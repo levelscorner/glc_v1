@@ -5,6 +5,7 @@ Public surface:
   - base.ChannelAdapter (ABC)
   - registry.discover() / registry.get(name)
 """
+
 from glc.channels.base import ChannelAdapter
 from glc.channels.envelope import (
     Attachment,

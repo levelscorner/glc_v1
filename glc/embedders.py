@@ -18,6 +18,7 @@ Ollama to Gemini without invalidating its FAISS index. Changing the
 provider pair, or the configured fallback model, is a one-way trip that
 invalidates every index — see README.
 """
+
 from __future__ import annotations
 
 import os
@@ -26,7 +27,6 @@ from collections import deque
 from typing import Literal
 
 import httpx
-
 
 TaskType = Literal["retrieval_document", "retrieval_query"]
 EMBED_DIM = 768  # both providers are pinned to this
@@ -156,8 +156,9 @@ class GeminiEmbedder(EmbeddingProvider):
         "retrieval_query": "RETRIEVAL_QUERY",
     }
 
-    def __init__(self, api_key: str, model: str, output_dim: int = EMBED_DIM,
-                 rpm: int = 5, cooldown: float = 5.0):
+    def __init__(
+        self, api_key: str, model: str, output_dim: int = EMBED_DIM, rpm: int = 5, cooldown: float = 5.0
+    ):
         self.api_key = api_key
         self.model = model
         self.output_dim = output_dim

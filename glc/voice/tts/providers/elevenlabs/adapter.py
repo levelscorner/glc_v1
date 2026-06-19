@@ -1,4 +1,5 @@
 """Stub provider for ElevenLabs Flash v2.5."""
+
 from __future__ import annotations
 
 from glc.voice.tts.base import SynthesizeResult, TTSProvider

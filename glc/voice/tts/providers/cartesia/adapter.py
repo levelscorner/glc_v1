@@ -1,4 +1,5 @@
 """Stub provider for Cartesia Sonic (streaming, sub-50ms TTFA)."""
+
 from __future__ import annotations
 
 from glc.voice.tts.base import SynthesizeResult, TTSProvider

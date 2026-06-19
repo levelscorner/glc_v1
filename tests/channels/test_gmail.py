@@ -7,6 +7,7 @@ https://developers.google.com/gmail/api/reference/rest/v1/users.messages/send
 Six structural tests + one behavioural test (Pub/Sub push → history →
 messages.get → multipart parse).
 """
+
 from __future__ import annotations
 
 import base64
@@ -17,7 +18,6 @@ import pytest
 from glc.channels.catalogue.gmail.adapter import Adapter
 from glc.channels.envelope import ChannelMessage, ChannelReply
 from glc.security.pairing import get_pairing_store
-
 from tests.channels.mocks.gmail_mock import OWNER_ID, STRANGER_ID, GmailMock
 
 

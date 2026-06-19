@@ -2,6 +2,7 @@
 the YAML parses, the rules satisfy the PolicyConfig schema, and the
 engine accepts at least the five lecture-default rules.
 """
+
 from __future__ import annotations
 
 import sys
@@ -19,9 +20,10 @@ def main() -> int:
     # Force an evaluation of each tool referenced in the rules — the
     # engine should not throw on any of the defaults.
     for r in eng.config.rules:
-        eng.evaluate({"name": r.tool if r.tool != "*" else "probe.tool",
-                      "arguments": {}},
-                     {"channel": "x", "trust_level": "owner_paired"})
+        eng.evaluate(
+            {"name": r.tool if r.tool != "*" else "probe.tool", "arguments": {}},
+            {"channel": "x", "trust_level": "owner_paired"},
+        )
     print(f"OK: policy.yaml loaded {n} rules")
     return 0
 

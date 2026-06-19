@@ -1,8 +1,9 @@
 """POST /v1/transcribe — STT through the voice routing layer."""
+
 from __future__ import annotations
 
 import base64
-from typing import Literal, Optional
+from typing import Literal
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
@@ -15,7 +16,7 @@ router = APIRouter()
 class TranscribeRequest(BaseModel):
     audio_b64: str
     mime: str = "audio/wav"
-    agent: Optional[str] = None
+    agent: str | None = None
     prefer: Literal["default", "local", "streaming"] = "default"
 
 
@@ -32,14 +33,17 @@ async def transcribe_route(req: TranscribeRequest):
     try:
         audio = base64.b64decode(req.audio_b64)
     except Exception as e:
-        raise HTTPException(400, f"audio_b64 is not valid base64: {e}")
+        raise HTTPException(400, f"audio_b64 is not valid base64: {e}") from e
     try:
         r = await transcribe(audio, req.mime, prefer=req.prefer)
     except STTError as e:
         if req.prefer == "streaming":
-            raise HTTPException(400, str(e))
-        raise HTTPException(e.status or 502, str(e))
+            raise HTTPException(400, str(e)) from e
+        raise HTTPException(e.status or 502, str(e)) from e
     return TranscribeResponse(
-        text=r.text, language=r.language, duration_ms=r.duration_ms,
-        provider=r.provider, cost_usd=r.cost_usd,
+        text=r.text,
+        language=r.language,
+        duration_ms=r.duration_ms,
+        provider=r.provider,
+        cost_usd=r.cost_usd,
     )

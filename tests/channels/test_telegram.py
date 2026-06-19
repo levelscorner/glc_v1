@@ -8,6 +8,7 @@ Wire-format basis: real Telegram Bot API payloads as defined at
 https://core.telegram.org/bots/api — `getUpdates` for inbound,
 `sendMessage` for outbound, `getFile` for the photo-attachment path.
 """
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -17,7 +18,6 @@ import pytest
 from glc.channels.catalogue.telegram.adapter import Adapter
 from glc.channels.envelope import ChannelMessage, ChannelReply
 from glc.security.pairing import get_pairing_store
-
 from tests.channels.mocks.telegram_mock import OWNER_ID, STRANGER_ID, TelegramMock
 
 
@@ -35,6 +35,7 @@ def pair_owner():
 
 
 # ── Structural tests ────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_on_message_owner_returns_valid_envelope(mock, pair_owner):
@@ -106,6 +107,7 @@ async def test_allowlist_silently_drops_stranger_in_public(mock):
 
 # ── Channel-specific behavioural test ───────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_channel_specific_behaviour_photo_attachment(mock, pair_owner):
     """A Telegram photo Update requires two steps. First, the adapter
@@ -126,6 +128,5 @@ async def test_channel_specific_behaviour_photo_attachment(mock, pair_owner):
     img = next((a for a in msg.attachments if a.kind == "image"), None)
     assert img is not None, "photo Attachment must have kind='image'"
     assert "photos/file_AgADBAADREALPHOTO" in img.ref, (
-        "Attachment.ref should encode the resolved file_path from getFile, "
-        "not the raw file_id"
+        "Attachment.ref should encode the resolved file_path from getFile, not the raw file_id"
     )

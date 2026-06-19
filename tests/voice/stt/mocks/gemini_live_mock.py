@@ -7,6 +7,7 @@ Adapter authors call this fake instead of the real upstream when
 mock-specific capture fields to assert the adapter dispatched the
 right shape.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field

@@ -20,6 +20,7 @@ load_wav(name)                    → returns canned wav bytes for
 play(audio_bytes)                 → records bytes the adapter dispatched
                                     to the speaker (filled into play_log)
 """
+
 from __future__ import annotations
 
 import io
@@ -37,8 +38,7 @@ STRANGER_ID = STRANGER_LOCAL_ID
 SAMPLE_RATE = 16_000
 
 
-def _make_wav(*, duration_s: float = 1.0, frequency: float = 220.0,
-              amplitude: float = 0.0) -> bytes:
+def _make_wav(*, duration_s: float = 1.0, frequency: float = 220.0, amplitude: float = 0.0) -> bytes:
     """Synthesise a mono 16-bit PCM WAV. `amplitude=0` is silence,
     non-zero produces a sine tone (used for the `noise.wav` fixture)."""
     n = int(duration_s * SAMPLE_RATE)
@@ -59,9 +59,9 @@ def _make_wav(*, duration_s: float = 1.0, frequency: float = 220.0,
 
 
 CANNED_WAVS = {
-    "hello.wav":   _make_wav(duration_s=1.0, amplitude=0.4, frequency=180.0),
+    "hello.wav": _make_wav(duration_s=1.0, amplitude=0.4, frequency=180.0),
     "silence.wav": _make_wav(duration_s=1.0, amplitude=0.0),
-    "noise.wav":   _make_wav(duration_s=1.0, amplitude=0.05, frequency=1100.0),
+    "noise.wav": _make_wav(duration_s=1.0, amplitude=0.05, frequency=1100.0),
 }
 
 
@@ -79,25 +79,37 @@ class LocalMicMock:
         return CANNED_WAVS[name]
 
     def queue_owner_message(self, text: str = "hello") -> dict[str, Any]:
-        ev = {"wav_bytes": self.load_wav("hello.wav"),
-              "sample_rate": SAMPLE_RATE, "source": "mic",
-              "speaker_id": OWNER_LOCAL_ID, "speaker_handle": "owner",
-              "_synthetic_label": text}
+        ev = {
+            "wav_bytes": self.load_wav("hello.wav"),
+            "sample_rate": SAMPLE_RATE,
+            "source": "mic",
+            "speaker_id": OWNER_LOCAL_ID,
+            "speaker_handle": "owner",
+            "_synthetic_label": text,
+        }
         self.inbound_events.append(ev)
         return ev
 
     def queue_stranger_message(self, text: str = "ping") -> dict[str, Any]:
-        ev = {"wav_bytes": self.load_wav("hello.wav"),
-              "sample_rate": SAMPLE_RATE, "source": "mic",
-              "speaker_id": STRANGER_LOCAL_ID, "speaker_handle": "stranger",
-              "_synthetic_label": text}
+        ev = {
+            "wav_bytes": self.load_wav("hello.wav"),
+            "sample_rate": SAMPLE_RATE,
+            "source": "mic",
+            "speaker_id": STRANGER_LOCAL_ID,
+            "speaker_handle": "stranger",
+            "_synthetic_label": text,
+        }
         self.inbound_events.append(ev)
         return ev
 
     def queue_silence(self) -> dict[str, Any]:
-        ev = {"wav_bytes": self.load_wav("silence.wav"),
-              "sample_rate": SAMPLE_RATE, "source": "mic",
-              "speaker_id": OWNER_LOCAL_ID, "speaker_handle": "owner"}
+        ev = {
+            "wav_bytes": self.load_wav("silence.wav"),
+            "sample_rate": SAMPLE_RATE,
+            "source": "mic",
+            "speaker_id": OWNER_LOCAL_ID,
+            "speaker_handle": "owner",
+        }
         self.inbound_events.append(ev)
         return ev
 

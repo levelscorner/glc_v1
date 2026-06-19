@@ -1,4 +1,5 @@
 """Per-channel per-user rate limits."""
+
 from __future__ import annotations
 
 import time
@@ -45,10 +46,12 @@ def test_window_slides(monkeypatch):
 
 def test_yaml_configuration_per_channel():
     r = RateLimiter(default_mpm=10, default_tpm=10)
-    r.configure_from_yaml({
-        "defaults": {"rate_limits": {"messages_per_minute": 10, "tool_calls_per_minute": 10}},
-        "channels": {"telegram": {"rate_limits": {"messages_per_minute": 1}}},
-    })
+    r.configure_from_yaml(
+        {
+            "defaults": {"rate_limits": {"messages_per_minute": 10, "tool_calls_per_minute": 10}},
+            "channels": {"telegram": {"rate_limits": {"messages_per_minute": 1}}},
+        }
+    )
     assert r.check_message("telegram", "1")[0]
     assert r.check_message("telegram", "1")[0] is False
     # Other channels still have default cap.

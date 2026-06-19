@@ -6,6 +6,7 @@ https://learn.microsoft.com/en-us/azure/bot-service/rest-api/bot-framework-rest-
 Six structural tests + one behavioural test (Adaptive Card body
 extraction).
 """
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -15,7 +16,6 @@ import pytest
 from glc.channels.catalogue.teams.adapter import Adapter
 from glc.channels.envelope import ChannelMessage, ChannelReply
 from glc.security.pairing import get_pairing_store
-
 from tests.channels.mocks.teams_mock import OWNER_ID, STRANGER_ID, TeamsMock
 
 
@@ -64,16 +64,13 @@ async def test_send_emits_valid_wire_payload(mock, pair_owner):
     # Prime the inbound id by sending one message in first.
     ev = mock.queue_owner_message("seed")
     await adapter.on_message(ev)
-    reply = ChannelReply(channel="teams", channel_user_id=OWNER_ID,
-                          text="hi back", thread_id=ev["id"])
+    reply = ChannelReply(channel="teams", channel_user_id=OWNER_ID, text="hi back", thread_id=ev["id"])
     await adapter.send(reply)
     assert len(mock.send_log) == 1
     body = mock.send_log[0]
     assert body.get("type") == "message"
     assert body.get("text") == "hi back"
-    assert body.get("replyToId") == ev["id"], (
-        "Teams replies must set replyToId to the inbound activity id"
-    )
+    assert body.get("replyToId") == ev["id"], "Teams replies must set replyToId to the inbound activity id"
 
 
 @pytest.mark.asyncio

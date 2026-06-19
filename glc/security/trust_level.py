@@ -8,6 +8,7 @@ classify(channel, channel_user_id) -> TrustLevel
 Adapters call this when constructing a ChannelMessage. The test suite
 verifies each channel's three trust paths (owner / paired / unknown).
 """
+
 from __future__ import annotations
 
 from typing import Literal

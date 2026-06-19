@@ -6,6 +6,7 @@ and https://discord.com/developers/docs/resources/channel#create-message.
 
 Six structural tests + one behavioural test (mention resolution).
 """
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -15,7 +16,6 @@ import pytest
 from glc.channels.catalogue.discord.adapter import Adapter
 from glc.channels.envelope import ChannelMessage, ChannelReply
 from glc.security.pairing import get_pairing_store
-
 from tests.channels.mocks.discord_mock import OWNER_ID, STRANGER_ID, DiscordMock
 
 
@@ -108,8 +108,7 @@ async def test_channel_specific_behaviour_mention_resolution(mock, pair_owner):
     `ChannelMessage.metadata["mentions"]`. Adapters that drop the
     mention or only echo the raw `<@id>` token fail this test."""
     adapter = Adapter(config={"mock": mock})
-    ev = mock.queue_mention_message(mentioned_user_id="123456789",
-                                    mentioned_username="alice")
+    ev = mock.queue_mention_message(mentioned_user_id="123456789", mentioned_username="alice")
     msg = await adapter.on_message(ev)
     assert msg is not None
     mentions = msg.metadata.get("mentions")

@@ -2,6 +2,7 @@
 
 Wire-format source: https://docs.cartesia.ai/api-reference/tts/bytes
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -12,7 +13,7 @@ from glc.voice.tts.base import SynthesizeResult, TTSError
 
 @dataclass
 class CartesiaMock:
-    canned_audio_b64: str = "QUFBQQ=="    # base64("AAAA")
+    canned_audio_b64: str = "QUFBQQ=="  # base64("AAAA")
     canned_mime: str = "audio/wav"
     canned_sample_rate: int = 24000
     received_calls: list[dict[str, Any]] = field(default_factory=list)
@@ -29,8 +30,9 @@ class CartesiaMock:
             status, msg = self.upstream_failure
             raise TTSError(msg, status=status)
         import time
+
         self.first_byte_at = time.time()
-        self.last_body = {'text': text, 'voice_id': voice_id}
+        self.last_body = {"text": text, "voice_id": voice_id}
         return SynthesizeResult(
             audio_b64=self.canned_audio_b64,
             mime=self.canned_mime,

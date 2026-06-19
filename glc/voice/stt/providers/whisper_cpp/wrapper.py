@@ -5,6 +5,7 @@ Expects a `whisper-cli` binary on PATH and a base model at
 subprocess, parses the JSON output, returns (text, language,
 duration_ms). The model download is handled by the install script.
 """
+
 from __future__ import annotations
 
 import json
@@ -14,9 +15,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-MODEL_DIR = Path(os.path.expanduser(
-    os.getenv("GLC_WHISPER_MODEL_DIR", "~/.glc/models/whisper-base")
-))
+MODEL_DIR = Path(os.path.expanduser(os.getenv("GLC_WHISPER_MODEL_DIR", "~/.glc/models/whisper-base")))
 MODEL_FILE = MODEL_DIR / "ggml-base.bin"
 
 
@@ -40,7 +39,9 @@ def run_whisper_cpp(audio: bytes, mime: str) -> tuple[str, str, int]:
     try:
         out = subprocess.run(
             [cli, "-m", str(MODEL_FILE), "-f", str(audio_path), "-oj"],
-            capture_output=True, text=True, check=True,
+            capture_output=True,
+            text=True,
+            check=True,
         )
     finally:
         audio_path.unlink(missing_ok=True)
@@ -51,6 +52,6 @@ def run_whisper_cpp(audio: bytes, mime: str) -> tuple[str, str, int]:
         segments = d.get("transcription") or d.get("segments") or []
         text = " ".join((s.get("text") or "").strip() for s in segments).strip()
         language = d.get("language") or "en"
-        duration_ms = int((segments[-1].get("offsets", {}).get("to", 0))) if segments else 0
+        duration_ms = int(segments[-1].get("offsets", {}).get("to", 0)) if segments else 0
         return text, language, duration_ms
     return out.stdout.strip(), "en", 0

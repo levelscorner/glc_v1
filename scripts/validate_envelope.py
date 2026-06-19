@@ -5,6 +5,7 @@ Passing this script does not mean the adapter works — it means the
 adapter has not redefined the envelope shape. Re-shaping the envelope
 breaks every other adapter and the agent runtime.
 """
+
 from __future__ import annotations
 
 import sys

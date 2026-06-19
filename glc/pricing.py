@@ -13,26 +13,26 @@ paid models still get sensible reports.
 Pricing source: provider docs as of 2026-05. Updated alongside
 `router.LIMITS` when those tiers shift.
 """
-from __future__ import annotations
 
+from __future__ import annotations
 
 # USD per 1,000,000 tokens (input, output).  None means "ask the user"
 # (we treat None as $0 to avoid lying about cost).
 PRICING_USD_PER_MTOK: dict[str, tuple[float, float]] = {
     # Free-tier under the AI-Studio quota used by the course.
-    "gemini":     (0.00, 0.00),
+    "gemini": (0.00, 0.00),
     # NVIDIA NIM free tier (build.nvidia.com), text models only here.
-    "nvidia":     (0.00, 0.00),
+    "nvidia": (0.00, 0.00),
     # Groq's openai/gpt-oss-120b: listed at $0.15/$0.75 per Mtok as of 2026-04.
-    "groq":       (0.15, 0.75),
+    "groq": (0.15, 0.75),
     # Cerebras zai-glm-4.7 list rate (rough; account-dependent).
-    "cerebras":   (0.50, 0.50),
+    "cerebras": (0.50, 0.50),
     # OpenRouter ":free" tag — $0 by definition.
     "openrouter": (0.00, 0.00),
     # GitHub Models free quota; outside quota the rate is GPT-4.1-mini's $0.40/$1.60.
-    "github":     (0.00, 0.00),
+    "github": (0.00, 0.00),
     # Local — never charged.
-    "ollama":     (0.00, 0.00),
+    "ollama": (0.00, 0.00),
 }
 
 

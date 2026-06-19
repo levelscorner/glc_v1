@@ -5,13 +5,13 @@ assert the canonical TranscribeResult contract holds; the behavioural
 test asserts the channel-specific wire behaviour from the upstream
 docs at https://ai.google.dev/api/multimodal-live.
 """
+
 from __future__ import annotations
 
 import pytest
 
 from glc.voice.stt.base import STTError, TranscribeResult
 from glc.voice.stt.providers.gemini_live.adapter import Provider
-
 from tests.voice.stt.mocks.gemini_live_mock import GeminiLiveMock
 
 
@@ -21,6 +21,7 @@ def mock():
 
 
 # ── Structural tests ───────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_provider_name_matches(mock):
@@ -73,6 +74,7 @@ async def test_transcribe_handles_empty_audio(mock):
 
 # ── Channel-specific behavioural test ──────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_channel_specific_behaviour_setup_frame_first(mock):
     """The Live API rejects sessions where audio arrives before the
@@ -82,6 +84,4 @@ async def test_channel_specific_behaviour_setup_frame_first(mock):
     await adapter.transcribe(b"audio", "audio/pcm")
     assert mock.frames_sent, "adapter must have sent at least one frame"
     first = mock.frames_sent[0]
-    assert "setup" in first or first.get("type") == "setup", (
-        f"first frame must be setup, got: {first}"
-    )
+    assert "setup" in first or first.get("type") == "setup", f"first frame must be setup, got: {first}"

@@ -6,6 +6,7 @@ https://developers.line.biz/en/reference/messaging-api/
 Six structural tests + one behavioural test (reply-token-vs-push
 selection).
 """
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -15,7 +16,6 @@ import pytest
 from glc.channels.catalogue.line.adapter import Adapter
 from glc.channels.envelope import ChannelMessage, ChannelReply
 from glc.security.pairing import get_pairing_store
-
 from tests.channels.mocks.line_mock import OWNER_ID, STRANGER_ID, LineMock
 
 

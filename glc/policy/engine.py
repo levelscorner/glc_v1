@@ -10,6 +10,7 @@ Hot reload on SIGHUP (process-level handler installed by main.py). Malformed
 yaml is rejected: the engine falls back to a deny-everything safe-default
 config and logs a warning so the gateway boots in a known-safe state.
 """
+
 from __future__ import annotations
 
 import fnmatch
@@ -25,7 +26,9 @@ from glc.policy.schemas import PolicyConfig, PolicyRule, PolicyVerdict
 _SAFE_DEFAULT = PolicyConfig(
     rules=[
         PolicyRule(
-            tool="*", trust_level="*", action="deny",
+            tool="*",
+            trust_level="*",
+            action="deny",
             reason="policy.yaml unreadable — falling back to deny-everything",
         )
     ]
@@ -127,7 +130,9 @@ class PolicyEngine:
             return PolicyVerdict(action="deny", reason=r.reason or "denied by policy", matched_rule_index=i)
         if first_match is not None:
             i, r = first_match
-            return PolicyVerdict(action=r.action, reason=r.reason or f"matched rule #{i}", matched_rule_index=i)
+            return PolicyVerdict(
+                action=r.action, reason=r.reason or f"matched rule #{i}", matched_rule_index=i
+            )
         if trust_level == "owner_paired":
             return PolicyVerdict(action="allow", reason="default-allow for owner_paired")
         return PolicyVerdict(action="deny", reason=f"default-deny for trust_level={trust_level}")
@@ -148,12 +153,14 @@ def get_engine() -> PolicyEngine:
     with _engine_lock:
         if _engine is None:
             from glc.config import policy_yaml_path
+
             _engine = PolicyEngine.from_yaml(policy_yaml_path())
     return _engine
 
 
 def reload_engine() -> None:
     from glc.config import policy_yaml_path
+
     eng = get_engine()
     eng.reload(policy_yaml_path())
 

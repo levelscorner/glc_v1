@@ -1,4 +1,5 @@
 """Allowlist enforcement and trust-level classification."""
+
 from __future__ import annotations
 
 from glc.security.allowlists import allowed
@@ -11,28 +12,26 @@ from glc.security.trust_level import classify
 
 
 def test_owner_in_dm_is_allowed():
-    ok, _ = allowed("webui", "owner-1", owner_ids=["owner-1"],
-                    is_public_channel=False, was_mentioned=False)
+    ok, _ = allowed("webui", "owner-1", owner_ids=["owner-1"], is_public_channel=False, was_mentioned=False)
     assert ok
 
 
 def test_unknown_sender_in_dm_is_denied_by_default():
-    ok, why = allowed("webui", "stranger-1", owner_ids=["owner-1"],
-                      is_public_channel=False, was_mentioned=False)
+    ok, why = allowed(
+        "webui", "stranger-1", owner_ids=["owner-1"], is_public_channel=False, was_mentioned=False
+    )
     assert ok is False
     assert "allowed_senders" in why
 
 
 def test_owner_in_public_without_mention_is_denied():
-    ok, why = allowed("webui", "owner-1", owner_ids=["owner-1"],
-                      is_public_channel=True, was_mentioned=False)
+    ok, why = allowed("webui", "owner-1", owner_ids=["owner-1"], is_public_channel=True, was_mentioned=False)
     assert ok is False
     assert "mention" in why.lower()
 
 
 def test_owner_in_public_with_mention_is_allowed():
-    ok, _ = allowed("webui", "owner-1", owner_ids=["owner-1"],
-                    is_public_channel=True, was_mentioned=True)
+    ok, _ = allowed("webui", "owner-1", owner_ids=["owner-1"], is_public_channel=True, was_mentioned=True)
     assert ok
 
 

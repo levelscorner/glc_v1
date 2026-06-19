@@ -5,13 +5,13 @@ assert the canonical TranscribeResult contract holds; the behavioural
 test asserts the channel-specific wire behaviour from the upstream
 docs at https://github.com/ggerganov/whisper.cpp.
 """
+
 from __future__ import annotations
 
 import pytest
 
 from glc.voice.stt.base import STTError, TranscribeResult
 from glc.voice.stt.providers.whisper_cpp.adapter import Provider
-
 from tests.voice.stt.mocks.whisper_cpp_mock import WhisperCppMock
 
 
@@ -21,6 +21,7 @@ def mock():
 
 
 # ── Structural tests ───────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_provider_name_matches(mock):
@@ -73,6 +74,7 @@ async def test_transcribe_handles_empty_audio(mock):
 
 # ── Channel-specific behavioural test ──────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_channel_specific_behaviour_vad_skips_silent_input(mock):
     """Invoking whisper-cli on silence wastes hundreds of milliseconds
@@ -80,9 +82,7 @@ async def test_channel_specific_behaviour_vad_skips_silent_input(mock):
     must VAD-detect silence (zero-amplitude bytes) and short-circuit
     before launching the subprocess."""
     adapter = Provider(config={"mock": mock})
-    silent = b"\x00" * 16000      # 1s of pure silence
+    silent = b"\x00" * 16000  # 1s of pure silence
     r = await adapter.transcribe(silent, "audio/wav")
     assert r.text == ""
-    assert mock.subprocess_call_count == 0, (
-        "subprocess must not run on silent input"
-    )
+    assert mock.subprocess_call_count == 0, "subprocess must not run on silent input"

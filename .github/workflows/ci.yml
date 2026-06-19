@@ -36,9 +36,15 @@ jobs:
           enable-cache: true
       - run: uv sync
       - run: |
+          # tests/channels and tests/voice/{stt,tts} are slot-specific stubs.
+          # adapter-pr.yml runs the matching slot test when its dir changes;
+          # here we cover the cross-cutting code (envelope, policy, audit,
+          # security, voice dispatchers, control plane, registry, V9 compat).
           uv run pytest tests/ \
             -m "not requires_live_api and not requires_models" \
             --ignore=tests/channels \
+            --ignore=tests/voice/stt \
+            --ignore=tests/voice/tts \
             --cov=glc --cov-report=term-missing --cov-fail-under=80
 
   schema-validation:

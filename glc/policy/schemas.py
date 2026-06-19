@@ -5,6 +5,7 @@ arbitrary `condition` fields. Actions are `allow`, `deny`, or
 `require_approval`. A `reason` field gives operators human-readable
 explanations of verdicts.
 """
+
 from __future__ import annotations
 
 from typing import Any, Literal
@@ -23,6 +24,7 @@ class PolicyRule(BaseModel):
     keys; the engine supports glob (`path_glob`), regex (`*_regex`),
     list membership (`*_in`), and substring matching by default.
     """
+
     tool: str = "*"
     channel: str = "*"
     trust_level: str = "*"

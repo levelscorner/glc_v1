@@ -5,6 +5,7 @@ and mention-only for public channels (when `mention_only_in_public: true`).
 The owner is whichever `channel_user_id` is currently in the pairings
 table with trust_level == owner_paired.
 """
+
 from __future__ import annotations
 
 from glc.config import load_channels
@@ -12,20 +13,27 @@ from glc.config import load_channels
 
 def _entry(channel: str) -> dict:
     cfg = load_channels()
-    defaults = (cfg.get("defaults") or {})
+    defaults = cfg.get("defaults") or {}
     ch_cfg = (cfg.get("channels") or {}).get(channel) or {}
     out = {
         "allowed_senders": ch_cfg.get("allowed_senders", defaults.get("allowed_senders", [])),
         "mention_only_in_public": ch_cfg.get(
-            "mention_only_in_public", defaults.get("mention_only_in_public", True),
+            "mention_only_in_public",
+            defaults.get("mention_only_in_public", True),
         ),
         "enabled": ch_cfg.get("enabled", True),
     }
     return out
 
 
-def allowed(channel: str, channel_user_id: str, *, owner_ids: list[str] | None = None,
-            is_public_channel: bool = False, was_mentioned: bool = False) -> tuple[bool, str]:
+def allowed(
+    channel: str,
+    channel_user_id: str,
+    *,
+    owner_ids: list[str] | None = None,
+    is_public_channel: bool = False,
+    was_mentioned: bool = False,
+) -> tuple[bool, str]:
     """Returns (ok, reason). If the channel itself is disabled, returns False.
     If `owner_ids` is provided, owners always pass. Otherwise, the call is
     allowed if `channel_user_id` is in `allowed_senders`. In public channels

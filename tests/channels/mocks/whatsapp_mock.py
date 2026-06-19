@@ -24,6 +24,7 @@ queue_unsigned_webhook(body)         → returns (body_bytes, headers)
 queue_tampered_webhook(body, secret) → returns (body_bytes, headers)
                                        with a deliberately wrong signature
 """
+
 from __future__ import annotations
 
 import hmac
@@ -32,7 +33,7 @@ from dataclasses import dataclass, field
 from hashlib import sha256
 from typing import Any
 
-OWNER_WA_ID = "919999990000"      # WhatsApp uses E.164 without the leading +.
+OWNER_WA_ID = "919999990000"  # WhatsApp uses E.164 without the leading +.
 STRANGER_WA_ID = "917777770000"
 OWNER_ID = OWNER_WA_ID
 STRANGER_ID = STRANGER_WA_ID
@@ -42,8 +43,14 @@ WABA_ID = "98765432100"
 DEFAULT_APP_SECRET = "test-app-secret"
 
 
-def _text_webhook(*, from_wa_id: str, text: str, profile_name: str,
-                  message_id: str = "wamid.HBgL", timestamp: str = "1700000000") -> dict[str, Any]:
+def _text_webhook(
+    *,
+    from_wa_id: str,
+    text: str,
+    profile_name: str,
+    message_id: str = "wamid.HBgL",
+    timestamp: str = "1700000000",
+) -> dict[str, Any]:
     return {
         "object": "whatsapp_business_account",
         "entry": [
@@ -58,9 +65,7 @@ def _text_webhook(*, from_wa_id: str, text: str, profile_name: str,
                                 "display_phone_number": "15555550100",
                                 "phone_number_id": PHONE_NUMBER_ID,
                             },
-                            "contacts": [
-                                {"profile": {"name": profile_name}, "wa_id": from_wa_id}
-                            ],
+                            "contacts": [{"profile": {"name": profile_name}, "wa_id": from_wa_id}],
                             "messages": [
                                 {
                                     "from": from_wa_id,
@@ -99,31 +104,36 @@ class WhatsappMock:
         return f"wamid.HBgL{self._next_msg}"
 
     def queue_owner_message(self, text: str = "hello") -> dict[str, Any]:
-        env = _text_webhook(from_wa_id=OWNER_WA_ID, text=text,
-                            profile_name="owner", message_id=self._msg_id())
+        env = _text_webhook(
+            from_wa_id=OWNER_WA_ID, text=text, profile_name="owner", message_id=self._msg_id()
+        )
         self.inbound_events.append(env)
         return env
 
     def queue_stranger_message(self, text: str = "ping") -> dict[str, Any]:
-        env = _text_webhook(from_wa_id=STRANGER_WA_ID, text=text,
-                            profile_name="stranger", message_id=self._msg_id())
+        env = _text_webhook(
+            from_wa_id=STRANGER_WA_ID, text=text, profile_name="stranger", message_id=self._msg_id()
+        )
         self.inbound_events.append(env)
         return env
 
-    def queue_signed_webhook(self, body: dict[str, Any] | None = None,
-                             text: str = "hi") -> tuple[bytes, dict[str, str]]:
+    def queue_signed_webhook(
+        self, body: dict[str, Any] | None = None, text: str = "hi"
+    ) -> tuple[bytes, dict[str, str]]:
         body = body if body is not None else self.queue_owner_message(text)
         raw = json.dumps(body, separators=(",", ":")).encode()
         return raw, {"X-Hub-Signature-256": _sign(raw, self.app_secret)}
 
-    def queue_unsigned_webhook(self, body: dict[str, Any] | None = None,
-                               text: str = "hi") -> tuple[bytes, dict[str, str]]:
+    def queue_unsigned_webhook(
+        self, body: dict[str, Any] | None = None, text: str = "hi"
+    ) -> tuple[bytes, dict[str, str]]:
         body = body if body is not None else self.queue_owner_message(text)
         raw = json.dumps(body, separators=(",", ":")).encode()
         return raw, {}
 
-    def queue_tampered_webhook(self, body: dict[str, Any] | None = None,
-                               text: str = "hi") -> tuple[bytes, dict[str, str]]:
+    def queue_tampered_webhook(
+        self, body: dict[str, Any] | None = None, text: str = "hi"
+    ) -> tuple[bytes, dict[str, str]]:
         body = body if body is not None else self.queue_owner_message(text)
         raw = json.dumps(body, separators=(",", ":")).encode()
         # Sign with a *different* secret so the verification fails.

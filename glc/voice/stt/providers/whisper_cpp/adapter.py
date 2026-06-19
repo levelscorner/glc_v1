@@ -3,6 +3,7 @@
 Group assignment: implement `transcribe(audio, mime)` against the
 mock-API fake in tests/voice/stt/mocks/whisper_cpp_mock.py.
 """
+
 from __future__ import annotations
 
 from glc.voice.stt.base import STTProvider, TranscribeResult

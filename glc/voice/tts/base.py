@@ -1,4 +1,5 @@
 """TTS provider ABC + canonical result/error types."""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod

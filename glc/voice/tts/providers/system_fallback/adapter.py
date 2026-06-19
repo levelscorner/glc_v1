@@ -5,6 +5,7 @@ four (kokoro, elevenlabs, cartesia, gemini_live) are group-assignment
 stubs. A fresh install can serve `/v1/speak?prefer=fallback` from day
 one through this provider.
 """
+
 from __future__ import annotations
 
 import base64
@@ -37,8 +38,10 @@ class Provider(TTSProvider):
             out.unlink(missing_ok=True)
         return SynthesizeResult(
             audio_b64=base64.b64encode(data).decode("ascii"),
-            mime="audio/aiff", sample_rate=22050,
-            provider="system_fallback", cost_usd=0.0,
+            mime="audio/aiff",
+            sample_rate=22050,
+            provider="system_fallback",
+            cost_usd=0.0,
         )
 
     @staticmethod
@@ -58,6 +61,8 @@ class Provider(TTSProvider):
             out.unlink(missing_ok=True)
         return SynthesizeResult(
             audio_b64=base64.b64encode(data).decode("ascii"),
-            mime="audio/wav", sample_rate=22050,
-            provider="system_fallback", cost_usd=0.0,
+            mime="audio/wav",
+            sample_rate=22050,
+            provider="system_fallback",
+            cost_usd=0.0,
         )

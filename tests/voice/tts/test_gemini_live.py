@@ -3,13 +3,13 @@
 Six structural tests + one behavioural test (response_modalities_audio).
 Wire-format source: https://ai.google.dev/api/multimodal-live.
 """
+
 from __future__ import annotations
 
 import pytest
 
 from glc.voice.tts.base import SynthesizeResult, TTSError
 from glc.voice.tts.providers.gemini_live.adapter import Provider
-
 from tests.voice.tts.mocks.gemini_live_mock import GeminiLiveMock
 
 
@@ -76,6 +76,5 @@ async def test_channel_specific_behaviour_response_modalities_audio(mock):
     adapter = Provider(config={"mock": mock})
     await adapter.synthesize("hello", voice_id=None)
     assert mock.setup_response_modalities == ["AUDIO"], (
-        f"setup frame must declare responseModalities=['AUDIO']; "
-        f"got {mock.setup_response_modalities!r}"
+        f"setup frame must declare responseModalities=['AUDIO']; got {mock.setup_response_modalities!r}"
     )

@@ -5,6 +5,7 @@ subclasses `STTProvider` and implements `transcribe(audio, mime)`.
 The result shape is the same across providers so callers don't
 notice which one ran.
 """
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod

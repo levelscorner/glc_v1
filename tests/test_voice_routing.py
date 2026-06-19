@@ -5,6 +5,7 @@ The shipped provider catalogue is stub-only for STT and 4-of-5 stubs
 for TTS (system_fallback ships working). Tests inject fakes through
 `register_test_provider` so they run offline.
 """
+
 from __future__ import annotations
 
 import pytest
@@ -20,8 +21,7 @@ from glc.voice.tts.router import register_test_provider as register_tts
 def _make_stt(name: str, text: str = "hello") -> STTProvider:
     class Fake(STTProvider):
         async def transcribe(self, audio, mime):
-            return TranscribeResult(text=text, language="en", duration_ms=100,
-                                    provider=name, cost_usd=0.0)
+            return TranscribeResult(text=text, language="en", duration_ms=100, provider=name, cost_usd=0.0)
 
     Fake.name = name
     return Fake()
@@ -30,8 +30,9 @@ def _make_stt(name: str, text: str = "hello") -> STTProvider:
 def _make_tts(name: str, audio_b64: str = "AAAA") -> TTSProvider:
     class Fake(TTSProvider):
         async def synthesize(self, text, voice_id=None):
-            return SynthesizeResult(audio_b64=audio_b64, mime="audio/wav",
-                                    sample_rate=24000, provider=name, cost_usd=0.0)
+            return SynthesizeResult(
+                audio_b64=audio_b64, mime="audio/wav", sample_rate=24000, provider=name, cost_usd=0.0
+            )
 
     Fake.name = name
     return Fake()
@@ -47,6 +48,7 @@ def _clean_test_providers():
 
 
 # ── STT ──────────────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_transcribe_streaming_raises_with_guidance():
@@ -89,6 +91,7 @@ async def test_transcribe_unknown_prefer_errors():
 
 
 # ── TTS ──────────────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_synthesize_default_routes_to_kokoro():

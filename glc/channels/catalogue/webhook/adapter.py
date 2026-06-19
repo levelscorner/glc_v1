@@ -4,6 +4,7 @@ Group assignment: implement on_message and send against the mock-API
 fake in tests/channels/mocks/webhook_mock.py. See docs/ADAPTER_GUIDE.md
 for the standard workflow.
 """
+
 from __future__ import annotations
 
 from typing import Any

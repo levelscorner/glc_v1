@@ -4,9 +4,14 @@ Implicit prefix caching on OpenAI-compat providers does not need a module —
 the gateway just keeps system byte-stable across calls and the upstream takes
 care of the rest. So this module is Gemini-only.
 """
+
 from __future__ import annotations
-import time, hashlib, asyncio, httpx
-from typing import Optional
+
+import asyncio
+import hashlib
+import time
+
+import httpx
 
 
 class GeminiCache:
@@ -25,7 +30,9 @@ class GeminiCache:
         h.update(text.encode())
         return h.hexdigest()
 
-    async def get_or_create(self, api_key: str, model: str, text: str, base_url: str) -> tuple[Optional[str], int]:
+    async def get_or_create(
+        self, api_key: str, model: str, text: str, base_url: str
+    ) -> tuple[str | None, int]:
         """Returns (cache_resource_name|None, cache_creation_input_tokens).
         cache_creation_input_tokens is non-zero only when we mint a fresh entry.
         """

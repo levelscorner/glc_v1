@@ -1,4 +1,5 @@
 """glc CLI entry point. `uv run glc serve` boots the gateway."""
+
 from __future__ import annotations
 
 import argparse
@@ -22,14 +23,17 @@ def main() -> int:
 
     if args.cmd == "serve":
         import uvicorn
+
         uvicorn.run("glc.main:app", host=args.host, port=args.port, reload=args.reload)
         return 0
     if args.cmd == "token":
         from glc.config import get_or_create_install_token
+
         print(get_or_create_install_token())
         return 0
     if args.cmd == "channels":
         from glc.channels.registry import discover
+
         for name, cls in sorted(discover().items()):
             print(f"  {name:14}  {cls.__module__}.{cls.__name__}")
         return 0

@@ -30,6 +30,7 @@ may touch:
 The maintainers' shared-code path bypasses the check by omitting the
 `# Group:` marker — the script exits 0 in that case with a notice.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -48,9 +49,7 @@ SHARED_ALLOWLIST: list[str] = [
 ]
 
 
-ROW_RE = re.compile(
-    r"^\|\s*([\w-]+)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*$"
-)
+ROW_RE = re.compile(r"^\|\s*([\w-]+)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*$")
 GROUP_MARKER_RE = re.compile(r"^\s*#\s*Group:\s*([\w-]+)\s*$", re.IGNORECASE | re.MULTILINE)
 
 
@@ -98,7 +97,10 @@ def matches_any(path: str, globs: list[str]) -> bool:
 def git_diff_names(base: str, head: str) -> list[str]:
     out = subprocess.run(
         ["git", "diff", "--name-only", f"{base}...{head}"],
-        check=True, capture_output=True, text=True, cwd=ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+        cwd=ROOT,
     )
     return [line.strip() for line in out.stdout.splitlines() if line.strip()]
 
@@ -108,11 +110,13 @@ def main() -> int:
     ap.add_argument("--base", default="origin/main")
     ap.add_argument("--head", default="HEAD")
     ap.add_argument(
-        "--group", default=None,
+        "--group",
+        default=None,
         help="override the group name (otherwise read from --pr-body)",
     )
     ap.add_argument(
-        "--pr-body", default="",
+        "--pr-body",
+        default="",
         help="PR description text; scanned for the `# Group: <name>` marker",
     )
     args = ap.parse_args()
@@ -136,8 +140,7 @@ def main() -> int:
         return 2
 
     files = git_diff_names(args.base, args.head)
-    stray = [f for f in files
-             if not matches_any(f, globs + SHARED_ALLOWLIST)]
+    stray = [f for f in files if not matches_any(f, globs + SHARED_ALLOWLIST)]
     if stray:
         print(f"[boundary] FAIL: group {group!r} touched files outside its owned paths:")
         for f in stray:
@@ -145,8 +148,10 @@ def main() -> int:
         print()
         print(f"  owned globs: {globs}")
         print(f"  shared allowlist: {SHARED_ALLOWLIST}")
-        print("\n  If you need a shared-code change, open a separate PR without "
-              "the `# Group:` marker and request @course-maintainers review.")
+        print(
+            "\n  If you need a shared-code change, open a separate PR without "
+            "the `# Group:` marker and request @course-maintainers review."
+        )
         return 1
 
     print(f"[boundary] OK: {len(files)} file(s) changed, all inside {group!r} owned paths")

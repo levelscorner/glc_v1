@@ -18,6 +18,7 @@ queue_image_message(mxc_url)    → m.image event with the given mxc:// URL
 download_media(mxc_url)         → synthetic bytes for an mxc:// URI
                                   (returned via /_matrix/media/v3/download)
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -31,8 +32,14 @@ STRANGER_ID = STRANGER_MX_ID
 ROOM_ID = "!abcdef:matrix.org"
 
 
-def _room_message(*, sender: str, body: str, msgtype: str = "m.text",
-                  event_id: str = "$evt-1", extra: dict[str, Any] | None = None) -> dict[str, Any]:
+def _room_message(
+    *,
+    sender: str,
+    body: str,
+    msgtype: str = "m.text",
+    event_id: str = "$evt-1",
+    extra: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     content: dict[str, Any] = {"msgtype": msgtype, "body": body}
     if extra:
         content.update(extra)
@@ -78,30 +85,31 @@ class MatrixMock:
         return f"$evt-{self._next_event}"
 
     def queue_owner_message(self, text: str = "hello") -> dict[str, Any]:
-        ev = _sync_response([
-            _room_message(sender=OWNER_MX_ID, body=text, event_id=self._evt_id())
-        ])
+        ev = _sync_response([_room_message(sender=OWNER_MX_ID, body=text, event_id=self._evt_id())])
         self.inbound_events.append(ev)
         return ev
 
     def queue_stranger_message(self, text: str = "ping") -> dict[str, Any]:
-        ev = _sync_response([
-            _room_message(sender=STRANGER_MX_ID, body=text, event_id=self._evt_id())
-        ])
+        ev = _sync_response([_room_message(sender=STRANGER_MX_ID, body=text, event_id=self._evt_id())])
         self.inbound_events.append(ev)
         return ev
 
-    def queue_image_message(self, mxc_url: str = "mxc://matrix.org/abc123",
-                             body: str = "photo.png") -> dict[str, Any]:
+    def queue_image_message(
+        self, mxc_url: str = "mxc://matrix.org/abc123", body: str = "photo.png"
+    ) -> dict[str, Any]:
         # Register synthetic content bytes for the mxc URI.
         self._media[mxc_url] = b"\x89PNG\r\n\x1a\n synthetic image bytes"
-        ev = _sync_response([
-            _room_message(
-                sender=OWNER_MX_ID, body=body, msgtype="m.image",
-                event_id=self._evt_id(),
-                extra={"url": mxc_url, "info": {"mimetype": "image/png", "size": 42}},
-            )
-        ])
+        ev = _sync_response(
+            [
+                _room_message(
+                    sender=OWNER_MX_ID,
+                    body=body,
+                    msgtype="m.image",
+                    event_id=self._evt_id(),
+                    extra={"url": mxc_url, "info": {"mimetype": "image/png", "size": 42}},
+                )
+            ]
+        )
         self.inbound_events.append(ev)
         return ev
 
@@ -114,8 +122,12 @@ class MatrixMock:
         if self.rate_limited:
             # Real Matrix error body:
             # {"errcode":"M_LIMIT_EXCEEDED","error":"Too Many Requests","retry_after_ms":2000}
-            return {"errcode": "M_LIMIT_EXCEEDED", "error": "Too Many Requests",
-                    "retry_after_ms": 2000, "status": 429}
+            return {
+                "errcode": "M_LIMIT_EXCEEDED",
+                "error": "Too Many Requests",
+                "retry_after_ms": 2000,
+                "status": 429,
+            }
         self.send_log.append(payload)
         return {"event_id": self._evt_id()}
 

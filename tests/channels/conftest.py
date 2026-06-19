@@ -14,6 +14,7 @@ This only kicks in when the test file follows the pattern
 `tests/channels/test_<channel>.py`. The channel name is read from the
 filename and used to locate `glc.channels.catalogue.<channel>.adapter`.
 """
+
 from __future__ import annotations
 
 import importlib
@@ -37,6 +38,6 @@ def pytest_collectstart(collector):  # pragma: no cover - pytest hook surface
         importlib.import_module(f"glc.channels.catalogue.{channel}.adapter")
     except Exception as e:
         pytest.skip(
-            f"channel adapter glc.channels.catalogue.{channel}.adapter "
-            f"failed to import: {e!r}", allow_module_level=True,
+            f"channel adapter glc.channels.catalogue.{channel}.adapter failed to import: {e!r}",
+            allow_module_level=True,
         )

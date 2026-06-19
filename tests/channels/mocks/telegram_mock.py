@@ -26,6 +26,7 @@ force_disconnect / pop_disconnect  → transport-level disconnect signal
                                      (used by the structural disconnect
                                      test)
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -40,20 +41,21 @@ OWNER_ID = str(OWNER_TG_ID)
 STRANGER_ID = str(STRANGER_TG_ID)
 
 
-def _make_message(*, from_id: int, username: str, text: str,
-                  chat_type: str = "private", message_id: int = 100) -> dict[str, Any]:
+def _make_message(
+    *, from_id: int, username: str, text: str, chat_type: str = "private", message_id: int = 100
+) -> dict[str, Any]:
     return {
         "message_id": message_id,
         "date": 1441645532,
         "chat": {"id": from_id, "type": chat_type, "username": username},
-        "from": {"id": from_id, "is_bot": False, "username": username,
-                 "first_name": username.capitalize()},
+        "from": {"id": from_id, "is_bot": False, "username": username, "first_name": username.capitalize()},
         "text": text,
     }
 
 
-def _make_photo_message(*, from_id: int, username: str, file_id: str,
-                        message_id: int = 200) -> dict[str, Any]:
+def _make_photo_message(
+    *, from_id: int, username: str, file_id: str, message_id: int = 200
+) -> dict[str, Any]:
     return {
         "message_id": message_id,
         "date": 1441645540,
@@ -61,10 +63,20 @@ def _make_photo_message(*, from_id: int, username: str, file_id: str,
         "from": {"id": from_id, "is_bot": False, "username": username},
         "caption": "look",
         "photo": [
-            {"file_id": file_id + "_small", "file_unique_id": "uniq_s",
-             "width": 90, "height": 60, "file_size": 1234},
-            {"file_id": file_id, "file_unique_id": "uniq_l",
-             "width": 800, "height": 600, "file_size": 123456},
+            {
+                "file_id": file_id + "_small",
+                "file_unique_id": "uniq_s",
+                "width": 90,
+                "height": 60,
+                "file_size": 1234,
+            },
+            {
+                "file_id": file_id,
+                "file_unique_id": "uniq_l",
+                "width": 800,
+                "height": 600,
+                "file_size": 123456,
+            },
         ],
     }
 
@@ -88,8 +100,9 @@ class TelegramMock:
     def queue_owner_message(self, text: str = "hello") -> dict[str, Any]:
         update = {
             "update_id": self._next_id(),
-            "message": _make_message(from_id=OWNER_TG_ID, username="owner",
-                                     text=text, message_id=self._next_id()),
+            "message": _make_message(
+                from_id=OWNER_TG_ID, username="owner", text=text, message_id=self._next_id()
+            ),
         }
         self.inbound_events.append(update)
         return update
@@ -97,19 +110,22 @@ class TelegramMock:
     def queue_stranger_message(self, text: str = "ping") -> dict[str, Any]:
         update = {
             "update_id": self._next_id(),
-            "message": _make_message(from_id=STRANGER_TG_ID, username="stranger",
-                                     text=text, message_id=self._next_id()),
+            "message": _make_message(
+                from_id=STRANGER_TG_ID, username="stranger", text=text, message_id=self._next_id()
+            ),
         }
         self.inbound_events.append(update)
         return update
 
-    def queue_photo_message(self, file_id: str = "AgADBAADHKgxG4xnEUe",
-                             from_owner: bool = True) -> dict[str, Any]:
+    def queue_photo_message(
+        self, file_id: str = "AgADBAADHKgxG4xnEUe", from_owner: bool = True
+    ) -> dict[str, Any]:
         sender = (OWNER_TG_ID, "owner") if from_owner else (STRANGER_TG_ID, "stranger")
         update = {
             "update_id": self._next_id(),
-            "message": _make_photo_message(from_id=sender[0], username=sender[1],
-                                           file_id=file_id, message_id=self._next_id()),
+            "message": _make_photo_message(
+                from_id=sender[0], username=sender[1], file_id=file_id, message_id=self._next_id()
+            ),
         }
         # Register the synthetic file_path that get_file will resolve.
         self._files[file_id] = {
@@ -128,17 +144,23 @@ class TelegramMock:
 
     async def send(self, payload: dict[str, Any]) -> dict[str, Any]:
         if self.rate_limited:
-            return {"status": 429, "error": "telegram: Too Many Requests",
-                    "ok": False, "error_code": 429,
-                    "parameters": {"retry_after": 30}}
+            return {
+                "status": 429,
+                "error": "telegram: Too Many Requests",
+                "ok": False,
+                "error_code": 429,
+                "parameters": {"retry_after": 30},
+            }
         self.send_log.append(payload)
         # Real Telegram response shape: {"ok": true, "result": Message}
         return {
             "ok": True,
-            "result": {"message_id": len(self.send_log) + 1000,
-                        "date": 1441645600,
-                        "chat": {"id": payload.get("chat_id"), "type": "private"},
-                        "text": payload.get("text", "")},
+            "result": {
+                "message_id": len(self.send_log) + 1000,
+                "date": 1441645600,
+                "chat": {"id": payload.get("chat_id"), "type": "private"},
+                "text": payload.get("text", ""),
+            },
         }
 
     def force_disconnect(self) -> None:

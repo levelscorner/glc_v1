@@ -5,6 +5,7 @@ https://spec.matrix.org/v1.10/client-server-api/
 
 Six structural tests + one behavioural test (mxc:// media download).
 """
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -14,7 +15,6 @@ import pytest
 from glc.channels.catalogue.matrix.adapter import Adapter
 from glc.channels.envelope import ChannelMessage, ChannelReply
 from glc.security.pairing import get_pairing_store
-
 from tests.channels.mocks.matrix_mock import OWNER_ID, STRANGER_ID, MatrixMock
 
 

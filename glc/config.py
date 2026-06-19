@@ -3,6 +3,7 @@
 The default config lives in `~/.glc/`. Override with GLC_CONFIG_DIR for
 tests and CI. The directory is created on import if missing.
 """
+
 from __future__ import annotations
 
 import os
@@ -47,6 +48,7 @@ def get_or_create_install_token() -> str:
     if p.exists():
         return p.read_text().strip()
     import secrets
+
     tok = secrets.token_urlsafe(32)
     p.write_text(tok)
     try:

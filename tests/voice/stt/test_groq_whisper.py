@@ -5,13 +5,13 @@ assert the canonical TranscribeResult contract holds; the behavioural
 test asserts the channel-specific wire behaviour from the upstream
 docs at https://console.groq.com/docs/speech-text.
 """
+
 from __future__ import annotations
 
 import pytest
 
 from glc.voice.stt.base import STTError, TranscribeResult
 from glc.voice.stt.providers.groq_whisper.adapter import Provider
-
 from tests.voice.stt.mocks.groq_whisper_mock import GroqWhisperMock
 
 
@@ -21,6 +21,7 @@ def mock():
 
 
 # ── Structural tests ───────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_provider_name_matches(mock):
@@ -72,6 +73,7 @@ async def test_transcribe_handles_empty_audio(mock):
 
 
 # ── Channel-specific behavioural test ──────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_channel_specific_behaviour_openai_multipart_shape(mock):

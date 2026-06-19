@@ -6,6 +6,7 @@ Wire-format basis: Stripe-style signed webhooks (HMAC-SHA256 over
 Six structural tests + one behavioural test (signature + replay-window
 verification).
 """
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -15,9 +16,11 @@ import pytest
 from glc.channels.catalogue.webhook.adapter import Adapter
 from glc.channels.envelope import ChannelMessage, ChannelReply
 from glc.security.pairing import get_pairing_store
-
 from tests.channels.mocks.webhook_mock import (
-    DEFAULT_SHARED_SECRET, OWNER_ID, STRANGER_ID, WebhookMock,
+    DEFAULT_SHARED_SECRET,
+    OWNER_ID,
+    STRANGER_ID,
+    WebhookMock,
 )
 
 
@@ -123,9 +126,7 @@ async def test_channel_specific_behaviour_signed_replay_window(mock, pair_owner)
     raw, headers = mock.queue_expired(text="too old")
     assert await adapter.on_message({"raw_body": raw, "headers": headers}) is None
 
-    raw, headers = mock.queue_signed({"sender_id": OWNER_ID,
-                                       "sender_handle": "owner",
-                                       "text": "fresh"})
+    raw, headers = mock.queue_signed({"sender_id": OWNER_ID, "sender_handle": "owner", "text": "fresh"})
     out = await adapter.on_message({"raw_body": raw, "headers": headers})
     assert isinstance(out, ChannelMessage)
     assert out.text == "fresh"

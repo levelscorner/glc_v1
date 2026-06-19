@@ -4,6 +4,7 @@ An adapter module is registered if it exposes a `class Adapter(ChannelAdapter)`.
 Registration is best-effort: a broken adapter logs a warning and is skipped
 so one bad student PR cannot break the gateway boot.
 """
+
 from __future__ import annotations
 
 import importlib

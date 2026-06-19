@@ -7,6 +7,7 @@ to the artifact store). The rate-limit shape here uses an SMTP 421
 (service unavailable) instead of HTTP 429 — that is the realistic
 back-pressure signal SMTP servers emit.
 """
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -16,7 +17,6 @@ import pytest
 from glc.channels.catalogue.imap.adapter import Adapter
 from glc.channels.envelope import ChannelMessage, ChannelReply
 from glc.security.pairing import get_pairing_store
-
 from tests.channels.mocks.imap_mock import OWNER_ID, STRANGER_ID, ImapMock
 
 
@@ -94,9 +94,7 @@ async def test_rate_limit_propagates_429(mock, pair_owner):
     reply = ChannelReply(channel="imap", channel_user_id=OWNER_ID, text="x")
     result = await adapter.send(reply)
     assert isinstance(result, dict)
-    assert result.get("status") in (421, 429), (
-        "SMTP back-pressure uses 421; the adapter may normalise to 429"
-    )
+    assert result.get("status") in (421, 429), "SMTP back-pressure uses 421; the adapter may normalise to 429"
 
 
 @pytest.mark.asyncio
@@ -124,8 +122,7 @@ async def test_channel_specific_behaviour_pdf_attachment_to_artifact(mock, pair_
     msg = await adapter.on_message(ev)
     assert msg is not None
     assert "see attached" in (msg.text or "")
-    pdf = next((a for a in msg.attachments
-                if a.kind == "file" and a.mime == "application/pdf"), None)
+    pdf = next((a for a in msg.attachments if a.kind == "file" and a.mime == "application/pdf"), None)
     assert pdf is not None, "PDF attachment must produce kind='file', mime='application/pdf'"
     assert pdf.ref.startswith("art:"), (
         "Attachment.ref must be an artifact handle, not raw bytes or a temp path"

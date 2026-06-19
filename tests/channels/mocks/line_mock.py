@@ -25,6 +25,7 @@ consume_reply_token(user_id)           → mock-side read; the adapter
                                          calls this in the spike to
                                          decide reply vs push
 """
+
 from __future__ import annotations
 
 import time
@@ -37,8 +38,9 @@ OWNER_ID = OWNER_LINE_ID
 STRANGER_ID = STRANGER_LINE_ID
 
 
-def _webhook(*, user_id: str, text: str, reply_token: str,
-             message_id: str = "100000000000") -> dict[str, Any]:
+def _webhook(
+    *, user_id: str, text: str, reply_token: str, message_id: str = "100000000000"
+) -> dict[str, Any]:
     return {
         "destination": "U01botdestination",
         "events": [

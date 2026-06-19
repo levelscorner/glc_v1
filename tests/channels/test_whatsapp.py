@@ -9,6 +9,7 @@ verification). The signature test is the load-bearing one for this
 channel: a missing or tampered signature means the adapter cannot
 trust the payload, so the envelope must not be constructed at all.
 """
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -18,9 +19,11 @@ import pytest
 from glc.channels.catalogue.whatsapp.adapter import Adapter
 from glc.channels.envelope import ChannelMessage, ChannelReply
 from glc.security.pairing import get_pairing_store
-
 from tests.channels.mocks.whatsapp_mock import (
-    DEFAULT_APP_SECRET, OWNER_ID, STRANGER_ID, WhatsappMock,
+    DEFAULT_APP_SECRET,
+    OWNER_ID,
+    STRANGER_ID,
+    WhatsappMock,
 )
 
 

@@ -6,6 +6,7 @@ Note: this is the *worker call* ledger, used by /v1/cost/by_agent. The
 audit log (every channel message, policy verdict, tool dispatch) is a
 separate append-only store under glc/audit/store.py.
 """
+
 from __future__ import annotations
 
 import os
@@ -72,13 +73,28 @@ def init() -> None:
 
 
 def log_call(
-    provider, model, input_tokens=0, output_tokens=0, latency_ms=0,
-    status="ok", error=None, prompt_chars=0, response_chars=0,
-    override=None, attempted=None,
-    cache_create_tokens=0, cache_read_tokens=0,
-    tool_calls=0, reasoning_applied=False, tool_dialect=None,
-    call_role="worker", router_decision=None, embed_dim=None,
-    agent=None, session=None, retries=0,
+    provider,
+    model,
+    input_tokens=0,
+    output_tokens=0,
+    latency_ms=0,
+    status="ok",
+    error=None,
+    prompt_chars=0,
+    response_chars=0,
+    override=None,
+    attempted=None,
+    cache_create_tokens=0,
+    cache_read_tokens=0,
+    tool_calls=0,
+    reasoning_applied=False,
+    tool_dialect=None,
+    call_role="worker",
+    router_decision=None,
+    embed_dim=None,
+    agent=None,
+    session=None,
+    retries=0,
 ) -> None:
     with conn() as c:
         c.execute(
@@ -90,12 +106,29 @@ def log_call(
                                   agent, session, retries)
                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
             (
-                time.time(), provider, model, input_tokens, output_tokens,
-                cache_create_tokens, cache_read_tokens, latency_ms,
-                status, error, prompt_chars, response_chars,
-                override, attempted, tool_calls, 1 if reasoning_applied else 0, tool_dialect,
-                call_role, router_decision, embed_dim,
-                agent, session, retries,
+                time.time(),
+                provider,
+                model,
+                input_tokens,
+                output_tokens,
+                cache_create_tokens,
+                cache_read_tokens,
+                latency_ms,
+                status,
+                error,
+                prompt_chars,
+                response_chars,
+                override,
+                attempted,
+                tool_calls,
+                1 if reasoning_applied else 0,
+                tool_dialect,
+                call_role,
+                router_decision,
+                embed_dim,
+                agent,
+                session,
+                retries,
             ),
         )
 
@@ -105,7 +138,8 @@ def by_agent(session=None, since=None):
     # Day-rollover fix: bucket by calendar day, not by 24h window.
     args = [since if since is not None else (time.time() - (time.time() % 86400))]
     if session:
-        where.append("session=?"); args.append(session)
+        where.append("session=?")
+        args.append(session)
     q = (
         "SELECT agent, provider, COUNT(*) AS calls, "
         "SUM(input_tokens) AS in_tok, SUM(output_tokens) AS out_tok, "
@@ -128,9 +162,11 @@ def recent(limit=100, provider=None, status=None):
     q = "SELECT * FROM calls"
     where, args = [], []
     if provider:
-        where.append("provider=?"); args.append(provider)
+        where.append("provider=?")
+        args.append(provider)
     if status:
-        where.append("status=?"); args.append(status)
+        where.append("status=?")
+        args.append(status)
     if where:
         q += " WHERE " + " AND ".join(where)
     q += " ORDER BY ts DESC LIMIT ?"

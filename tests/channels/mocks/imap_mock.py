@@ -18,9 +18,9 @@ queue_pdf_attachment_message(text)     → multipart/mixed with a
                                          text/plain part and a
                                          base64-encoded PDF attachment
 """
+
 from __future__ import annotations
 
-import base64
 from dataclasses import dataclass, field
 from email.message import EmailMessage
 from typing import Any
@@ -56,8 +56,7 @@ def _pdf_attachment_message(*, from_addr: str, body: str, uid: int) -> dict[str,
     msg["Date"] = "Wed, 17 Jun 2026 12:00:00 +0000"
     msg["Message-ID"] = f"<{uid}@example.com>"
     msg.set_content(body)
-    msg.add_attachment(PDF_BYTES, maintype="application", subtype="pdf",
-                       filename="report.pdf")
+    msg.add_attachment(PDF_BYTES, maintype="application", subtype="pdf", filename="report.pdf")
     return {"uid": uid, "raw": bytes(msg)}
 
 
@@ -75,14 +74,12 @@ class ImapMock:
         return self._next_uid
 
     def queue_owner_message(self, text: str = "hello") -> dict[str, Any]:
-        ev = _text_message(from_addr=OWNER_EMAIL, subject="ping",
-                           body=text, uid=self._uid())
+        ev = _text_message(from_addr=OWNER_EMAIL, subject="ping", body=text, uid=self._uid())
         self.inbound_events.append(ev)
         return ev
 
     def queue_stranger_message(self, text: str = "ping") -> dict[str, Any]:
-        ev = _text_message(from_addr=STRANGER_EMAIL, subject="ping",
-                           body=text, uid=self._uid())
+        ev = _text_message(from_addr=STRANGER_EMAIL, subject="ping", body=text, uid=self._uid())
         self.inbound_events.append(ev)
         return ev
 

@@ -1,28 +1,50 @@
 """Capability-aware router. Same RPM/RPD bookkeeping as V1, but now it can
 skip providers that lack a requested capability (tools/reasoning/structured/caching)."""
-from __future__ import annotations
-import time, asyncio
-from collections import deque, defaultdict
 
+from __future__ import annotations
+
+import asyncio
+import time
+from collections import defaultdict, deque
 
 LIMITS = {
-    "ollama":     {"rpm": 9999, "rpd": 9999999, "tpm": 99999999, "cooldown": 0,   "max_ctx": 32000},
-    "cerebras":   {"rpm": 30,   "rpd": 9999,    "tpm": 60000,    "cooldown": 2,   "max_ctx": 8000,    "tokens_per_day": 1_000_000},
-    "groq":       {"rpm": 30,   "rpd": 1000,    "tpm": 6000,     "cooldown": 2,   "max_ctx": 100000},
-    "nvidia":     {"rpm": 40,   "rpd": 9999,    "tpm": 100000,   "cooldown": 2,   "max_ctx": 100000},
-    "gemini":     {"rpm": 15,   "rpd": 1000,    "tpm": 250000,   "cooldown": 4,   "max_ctx": 1000000},
-    "openrouter": {"rpm": 20,   "rpd": 50,      "tpm": 99999999, "cooldown": 3,   "max_ctx": 100000},
-    "github":     {"rpm": 10,   "rpd": 50,      "tpm": 99999999, "cooldown": 6,   "max_ctx": 8000},
+    "ollama": {"rpm": 9999, "rpd": 9999999, "tpm": 99999999, "cooldown": 0, "max_ctx": 32000},
+    "cerebras": {
+        "rpm": 30,
+        "rpd": 9999,
+        "tpm": 60000,
+        "cooldown": 2,
+        "max_ctx": 8000,
+        "tokens_per_day": 1_000_000,
+    },
+    "groq": {"rpm": 30, "rpd": 1000, "tpm": 6000, "cooldown": 2, "max_ctx": 100000},
+    "nvidia": {"rpm": 40, "rpd": 9999, "tpm": 100000, "cooldown": 2, "max_ctx": 100000},
+    "gemini": {"rpm": 15, "rpd": 1000, "tpm": 250000, "cooldown": 4, "max_ctx": 1000000},
+    "openrouter": {"rpm": 20, "rpd": 50, "tpm": 99999999, "cooldown": 3, "max_ctx": 100000},
+    "github": {"rpm": 10, "rpd": 50, "tpm": 99999999, "cooldown": 6, "max_ctx": 8000},
 }
 
 SHORTCUTS = {
-    "g": "gemini", "gem": "gemini", "gemini": "gemini",
-    "n": "nvidia", "nv": "nvidia", "nvidia": "nvidia",
-    "o": "ollama", "oll": "ollama", "ollama": "ollama",
-    "gr": "groq", "groq": "groq",
-    "c": "cerebras", "cer": "cerebras", "cerebras": "cerebras",
-    "or": "openrouter", "opr": "openrouter", "openrouter": "openrouter",
-    "gh": "github", "ghb": "github", "github": "github",
+    "g": "gemini",
+    "gem": "gemini",
+    "gemini": "gemini",
+    "n": "nvidia",
+    "nv": "nvidia",
+    "nvidia": "nvidia",
+    "o": "ollama",
+    "oll": "ollama",
+    "ollama": "ollama",
+    "gr": "groq",
+    "groq": "groq",
+    "c": "cerebras",
+    "cer": "cerebras",
+    "cerebras": "cerebras",
+    "or": "openrouter",
+    "opr": "openrouter",
+    "openrouter": "openrouter",
+    "gh": "github",
+    "ghb": "github",
+    "github": "github",
 }
 
 
@@ -104,7 +126,9 @@ class RateState:
             "tpm_limit": limits["tpm"],
             "tokens_today": self.tokens_today,
             "tokens_per_day": limits.get("tokens_per_day"),
-            "cooldown_remaining": max(0, limits["cooldown"] - (now - self.last_call)) if self.last_call else 0,
+            "cooldown_remaining": max(0, limits["cooldown"] - (now - self.last_call))
+            if self.last_call
+            else 0,
             "last_call": self.last_call,
             "backoff_remaining": max(0, self.unavailable_until - now),
             "backoff_reason": self.unavailable_reason if now < self.unavailable_until else "",
@@ -136,7 +160,9 @@ class Router:
                     attempts.append({"provider": name, "reason": f"skipped:no_{missing[0]}"})
                     continue
             if est_tokens > limits["max_ctx"]:
-                attempts.append({"provider": name, "reason": f"prompt {est_tokens} > max_ctx {limits['max_ctx']}"})
+                attempts.append(
+                    {"provider": name, "reason": f"prompt {est_tokens} > max_ctx {limits['max_ctx']}"}
+                )
                 continue
             ok, why = self.state[name].can_use(limits, est_tokens)
             if ok:
@@ -168,6 +194,7 @@ class RouterPool:
     a call_role marker (router_perception | router_memory | router_decision)
     so the dashboard can show router activity separately from worker activity.
     """
+
     def __init__(self, providers: dict, order: list[str]):
         self.providers = providers
         self.order = [p for p in order if p in providers]

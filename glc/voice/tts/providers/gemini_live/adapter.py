@@ -1,4 +1,5 @@
 """Stub provider for Gemini Live realtime full-duplex TTS."""
+
 from __future__ import annotations
 
 from glc.voice.tts.base import SynthesizeResult, TTSProvider

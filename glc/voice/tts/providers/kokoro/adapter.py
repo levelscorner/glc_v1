@@ -3,6 +3,7 @@
 Group assignment: implement `synthesize(text, voice_id)` against the
 mock-API fake in tests/voice/tts/mocks/kokoro_mock.py.
 """
+
 from __future__ import annotations
 
 from glc.voice.tts.base import SynthesizeResult, TTSProvider

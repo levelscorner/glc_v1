@@ -11,6 +11,7 @@ The local_mic adapter routes audio through `/v1/transcribe` and
 Six structural tests + one behavioural test (speech vs silence
 gating + TTS playback round-trip).
 """
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -24,7 +25,6 @@ from glc.voice.stt.base import STTProvider, TranscribeResult
 from glc.voice.stt.router import register_test_provider as register_stt
 from glc.voice.tts.base import SynthesizeResult, TTSProvider
 from glc.voice.tts.router import register_test_provider as register_tts
-
 from tests.channels.mocks.local_mic_mock import OWNER_ID, STRANGER_ID, LocalMicMock
 
 
@@ -36,11 +36,12 @@ def _fake_stt(transcribe_text: str = "hello"):
             # Silent inputs (zero amplitude) return empty transcript so
             # the adapter can VAD-gate without burning a transcribe call.
             if all(b == 0 for b in audio[:200]):
-                return TranscribeResult(text="", language="en", duration_ms=0,
-                                        provider="groq_whisper", cost_usd=0.0)
-            return TranscribeResult(text=transcribe_text, language="en",
-                                    duration_ms=200, provider="groq_whisper",
-                                    cost_usd=0.0)
+                return TranscribeResult(
+                    text="", language="en", duration_ms=0, provider="groq_whisper", cost_usd=0.0
+                )
+            return TranscribeResult(
+                text=transcribe_text, language="en", duration_ms=200, provider="groq_whisper", cost_usd=0.0
+            )
 
     return _F()
 
@@ -50,9 +51,9 @@ def _fake_tts():
         name = "kokoro"
 
         async def synthesize(self, text, voice_id=None):
-            return SynthesizeResult(audio_b64="AAAA", mime="audio/wav",
-                                    sample_rate=24000, provider="kokoro",
-                                    cost_usd=0.0)
+            return SynthesizeResult(
+                audio_b64="AAAA", mime="audio/wav", sample_rate=24000, provider="kokoro", cost_usd=0.0
+            )
 
     return _F()
 

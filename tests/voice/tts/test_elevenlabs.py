@@ -3,13 +3,13 @@
 Six structural tests + one behavioural test (free_tier_quota_tracking).
 Wire-format source: https://elevenlabs.io/docs/api-reference/text-to-speech.
 """
+
 from __future__ import annotations
 
 import pytest
 
 from glc.voice.tts.base import SynthesizeResult, TTSError
 from glc.voice.tts.providers.elevenlabs.adapter import Provider
-
 from tests.voice.tts.mocks.elevenlabs_mock import ElevenlabsMock
 
 

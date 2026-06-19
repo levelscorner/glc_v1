@@ -6,6 +6,7 @@ https://www.twilio.com/docs/messaging/api/message-resource
 
 Six structural tests + one behavioural test (MMS media download → artifact).
 """
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -15,7 +16,6 @@ import pytest
 from glc.channels.catalogue.twilio_sms.adapter import Adapter
 from glc.channels.envelope import Attachment, ChannelMessage, ChannelReply
 from glc.security.pairing import get_pairing_store
-
 from tests.channels.mocks.twilio_sms_mock import OWNER_ID, STRANGER_ID, TwilioSmsMock
 
 
@@ -111,8 +111,7 @@ async def test_channel_specific_behaviour_mms_media_persists_as_artifact(mock, p
     payload that carries `MediaUrl` (the URL the agent must serve from
     the artifact store on the public side)."""
     adapter = Adapter(config={"mock": mock})
-    ev = mock.queue_mms_message(body="here's the photo",
-                                media_url="https://api.twilio.com/Media/MM_real.jpg")
+    ev = mock.queue_mms_message(body="here's the photo", media_url="https://api.twilio.com/Media/MM_real.jpg")
     msg = await adapter.on_message(ev)
     assert msg is not None
     img = next((a for a in msg.attachments if a.kind == "image"), None)
@@ -123,12 +122,17 @@ async def test_channel_specific_behaviour_mms_media_persists_as_artifact(mock, p
 
     # Send side: outbound MMS attaches MediaUrl.
     reply = ChannelReply(
-        channel="twilio_sms", channel_user_id=OWNER_ID, text="reply with image",
-        attachments=[Attachment(kind="image", ref="art:abc123",
-                                metadata={"public_url": "https://glc.example/artifacts/abc123"})],
+        channel="twilio_sms",
+        channel_user_id=OWNER_ID,
+        text="reply with image",
+        attachments=[
+            Attachment(
+                kind="image",
+                ref="art:abc123",
+                metadata={"public_url": "https://glc.example/artifacts/abc123"},
+            )
+        ],
     )
     await adapter.send(reply)
     out = mock.send_log[-1]
-    assert "MediaUrl" in out or "MediaUrl0" in out, (
-        "outbound MMS must include MediaUrl(0)"
-    )
+    assert "MediaUrl" in out or "MediaUrl0" in out, "outbound MMS must include MediaUrl(0)"

@@ -24,6 +24,7 @@ queue_unsigned(body)                  → returns (body_bytes, headers)
 queue_expired(body, secret)           → returns (body_bytes, headers)
                                         with a 10-minute-old timestamp
 """
+
 from __future__ import annotations
 
 import hmac
@@ -66,37 +67,36 @@ class WebhookMock:
     shared_secret: str = DEFAULT_SHARED_SECRET
 
     def queue_owner_message(self, text: str = "hello") -> dict[str, Any]:
-        body, headers = self.queue_signed(_body(sender_id=OWNER_INT_ID,
-                                                 handle="owner", text=text))
+        body, headers = self.queue_signed(_body(sender_id=OWNER_INT_ID, handle="owner", text=text))
         ev = {"raw_body": body, "headers": headers}
         self.inbound_events.append(ev)
         return ev
 
     def queue_stranger_message(self, text: str = "ping") -> dict[str, Any]:
-        body, headers = self.queue_signed(_body(sender_id=STRANGER_INT_ID,
-                                                 handle="stranger", text=text))
+        body, headers = self.queue_signed(_body(sender_id=STRANGER_INT_ID, handle="stranger", text=text))
         ev = {"raw_body": body, "headers": headers}
         self.inbound_events.append(ev)
         return ev
 
-    def queue_signed(self, body: dict[str, Any], *, age_s: int = 0,
-                     secret: str | None = None) -> tuple[bytes, dict[str, str]]:
+    def queue_signed(
+        self, body: dict[str, Any], *, age_s: int = 0, secret: str | None = None
+    ) -> tuple[bytes, dict[str, str]]:
         secret = secret or self.shared_secret
         raw = json.dumps(body, separators=(",", ":")).encode()
         ts = int(time.time()) - age_s
         return raw, {"X-Webhook-Signature": _sign(ts, raw, secret)}
 
-    def queue_unsigned(self, body: dict[str, Any] | None = None,
-                        text: str = "no signature") -> tuple[bytes, dict[str, str]]:
-        body = body if body is not None else _body(sender_id=OWNER_INT_ID,
-                                                    handle="owner", text=text)
+    def queue_unsigned(
+        self, body: dict[str, Any] | None = None, text: str = "no signature"
+    ) -> tuple[bytes, dict[str, str]]:
+        body = body if body is not None else _body(sender_id=OWNER_INT_ID, handle="owner", text=text)
         raw = json.dumps(body, separators=(",", ":")).encode()
         return raw, {}
 
-    def queue_expired(self, body: dict[str, Any] | None = None,
-                       text: str = "expired") -> tuple[bytes, dict[str, str]]:
-        body = body if body is not None else _body(sender_id=OWNER_INT_ID,
-                                                    handle="owner", text=text)
+    def queue_expired(
+        self, body: dict[str, Any] | None = None, text: str = "expired"
+    ) -> tuple[bytes, dict[str, str]]:
+        body = body if body is not None else _body(sender_id=OWNER_INT_ID, handle="owner", text=text)
         return self.queue_signed(body, age_s=REPLAY_WINDOW_SECONDS + 30)
 
     async def send(self, payload: dict[str, Any]) -> dict[str, Any]:

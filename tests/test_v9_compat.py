@@ -5,24 +5,40 @@ These tests do not exercise the upstream LLM calls (no live keys in
 CI); they verify the route surface, OpenAPI schema, request validation,
 and the listings endpoints return the expected V9 keys.
 """
+
 from __future__ import annotations
 
 
 def test_v9_routes_are_registered(app_client):
     openapi = app_client.get("/openapi.json").json()
     paths = set(openapi["paths"].keys())
-    for p in ["/v1/chat", "/v1/chat/batch", "/v1/vision", "/v1/embed",
-              "/v1/cost/by_agent", "/v1/providers", "/v1/capabilities",
-              "/v1/status", "/v1/routers", "/v1/calls", "/v1/embedders"]:
+    for p in [
+        "/v1/chat",
+        "/v1/chat/batch",
+        "/v1/vision",
+        "/v1/embed",
+        "/v1/cost/by_agent",
+        "/v1/providers",
+        "/v1/capabilities",
+        "/v1/status",
+        "/v1/routers",
+        "/v1/calls",
+        "/v1/embedders",
+    ]:
         assert p in paths, f"missing V9 route {p}"
 
 
 def test_new_s11_routes_are_registered(app_client):
     openapi = app_client.get("/openapi.json").json()
     paths = set(openapi["paths"].keys())
-    for p in ["/v1/transcribe", "/v1/speak",
-              "/v1/control/kill", "/v1/control/pair",
-              "/v1/control/pair/confirm", "/v1/control/presence"]:
+    for p in [
+        "/v1/transcribe",
+        "/v1/speak",
+        "/v1/control/kill",
+        "/v1/control/pair",
+        "/v1/control/pair/confirm",
+        "/v1/control/presence",
+    ]:
         assert p in paths
 
 
@@ -51,9 +67,7 @@ def test_v1_cost_by_agent_returns_dict(app_client):
 
 
 def test_chat_request_rejects_bad_provider(app_client):
-    r = app_client.post("/v1/chat", json={
-        "prompt": "hi", "provider": "no_such_provider"
-    })
+    r = app_client.post("/v1/chat", json={"prompt": "hi", "provider": "no_such_provider"})
     # If no providers wired at all, the validation hits 400; if they are
     # wired, the candidate list is empty (also 400).
     assert r.status_code in (400, 503)

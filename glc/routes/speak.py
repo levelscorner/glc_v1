@@ -1,7 +1,8 @@
 """POST /v1/speak — TTS through the voice routing layer."""
+
 from __future__ import annotations
 
-from typing import Literal, Optional
+from typing import Literal
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
@@ -13,8 +14,8 @@ router = APIRouter()
 
 class SpeakRequest(BaseModel):
     text: str
-    voice_id: Optional[str] = None
-    agent: Optional[str] = None
+    voice_id: str | None = None
+    agent: str | None = None
     prefer: Literal["default", "quality", "streaming", "realtime", "fallback"] = "default"
 
 
@@ -31,8 +32,11 @@ async def speak_route(req: SpeakRequest):
     try:
         r = await synthesize(req.text, voice_id=req.voice_id, prefer=req.prefer)
     except TTSError as e:
-        raise HTTPException(e.status or 502, str(e))
+        raise HTTPException(e.status or 502, str(e)) from e
     return SpeakResponse(
-        audio_b64=r.audio_b64, mime=r.mime, sample_rate=r.sample_rate,
-        provider=r.provider, cost_usd=r.cost_usd,
+        audio_b64=r.audio_b64,
+        mime=r.mime,
+        sample_rate=r.sample_rate,
+        provider=r.provider,
+        cost_usd=r.cost_usd,
     )

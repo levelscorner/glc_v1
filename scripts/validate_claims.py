@@ -1,4 +1,5 @@
 """CLAIMS.md uniqueness gate. A channel cannot be claimed twice."""
+
 from __future__ import annotations
 
 import re

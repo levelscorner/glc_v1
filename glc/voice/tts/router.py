@@ -11,6 +11,7 @@ system_fallback ships fully implemented so a fresh install can answer
 /v1/speak?prefer=fallback on day one. The other four are stubs until
 their owning groups land an implementation.
 """
+
 from __future__ import annotations
 
 import importlib
@@ -18,11 +19,11 @@ import importlib
 from glc.voice.tts.base import SynthesizeResult, TTSError, TTSProvider
 
 PREFER_TO_PROVIDER: dict[str, str] = {
-    "default":   "kokoro",
-    "quality":   "elevenlabs",
+    "default": "kokoro",
+    "quality": "elevenlabs",
     "streaming": "cartesia",
-    "realtime":  "gemini_live",
-    "fallback":  "system_fallback",
+    "realtime": "gemini_live",
+    "fallback": "system_fallback",
 }
 
 PROVIDERS_PACKAGE = "glc.voice.tts.providers"
@@ -36,9 +37,7 @@ def _load_provider(name: str) -> TTSProvider:
     try:
         mod = importlib.import_module(f"{PROVIDERS_PACKAGE}.{name}.adapter")
     except ImportError as e:
-        raise TTSError(
-            f"TTS provider '{name}' is not installed. ({e})"
-        ) from e
+        raise TTSError(f"TTS provider '{name}' is not installed. ({e})") from e
     cls = getattr(mod, "Provider", None)
     if cls is None or not issubclass(cls, TTSProvider):
         raise TTSError(
@@ -48,12 +47,9 @@ def _load_provider(name: str) -> TTSProvider:
     return cls()
 
 
-async def synthesize(text: str, voice_id: str | None = None,
-                     prefer: str = "default") -> SynthesizeResult:
+async def synthesize(text: str, voice_id: str | None = None, prefer: str = "default") -> SynthesizeResult:
     if prefer not in PREFER_TO_PROVIDER:
-        raise TTSError(
-            f"unknown prefer={prefer!r}. Pick one of: {list(PREFER_TO_PROVIDER)}"
-        )
+        raise TTSError(f"unknown prefer={prefer!r}. Pick one of: {list(PREFER_TO_PROVIDER)}")
     name = PREFER_TO_PROVIDER[prefer]
     provider = _load_provider(name)
     try:
@@ -88,6 +84,7 @@ async def _call_cartesia(text: str, voice_id: str | None) -> SynthesizeResult:  
 
 def _call_system_tts(text: str) -> SynthesizeResult:  # pragma: no cover
     import asyncio
+
     return asyncio.get_event_loop().run_until_complete(
         _load_provider("system_fallback").synthesize(text, None)
     )

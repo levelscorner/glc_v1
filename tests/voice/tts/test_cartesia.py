@@ -3,13 +3,13 @@
 Six structural tests + one behavioural test (time_to_first_audio).
 Wire-format source: https://docs.cartesia.ai/api-reference/tts/bytes.
 """
+
 from __future__ import annotations
 
 import pytest
 
 from glc.voice.tts.base import SynthesizeResult, TTSError
 from glc.voice.tts.providers.cartesia.adapter import Provider
-
 from tests.voice.tts.mocks.cartesia_mock import CartesiaMock
 
 
@@ -76,11 +76,10 @@ async def test_channel_specific_behaviour_time_to_first_audio(mock):
     start is under a synthetic threshold (10ms against the offline
     mock, which is generous)."""
     import time
+
     adapter = Provider(config={"mock": mock})
     t0 = time.time()
     await adapter.synthesize("hello", voice_id="neutral-id")
     assert mock.first_byte_at is not None
     ttfa_ms = (mock.first_byte_at - t0) * 1000
-    assert ttfa_ms < 200, (
-        f"TTFA was {ttfa_ms:.1f}ms; Cartesia replies must stream early"
-    )
+    assert ttfa_ms < 200, f"TTFA was {ttfa_ms:.1f}ms; Cartesia replies must stream early"

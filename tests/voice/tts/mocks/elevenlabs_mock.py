@@ -2,6 +2,7 @@
 
 Wire-format source: https://elevenlabs.io/docs/api-reference/text-to-speech
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -12,7 +13,7 @@ from glc.voice.tts.base import SynthesizeResult, TTSError
 
 @dataclass
 class ElevenlabsMock:
-    canned_audio_b64: str = "QUFBQQ=="    # base64("AAAA")
+    canned_audio_b64: str = "QUFBQQ=="  # base64("AAAA")
     canned_mime: str = "audio/wav"
     canned_sample_rate: int = 24000
     received_calls: list[dict[str, Any]] = field(default_factory=list)
@@ -29,7 +30,7 @@ class ElevenlabsMock:
         if self.upstream_failure is not None:
             status, msg = self.upstream_failure
             raise TTSError(msg, status=status)
-        self.last_body = {'text': text, 'voice_id': voice_id}
+        self.last_body = {"text": text, "voice_id": voice_id}
         self.monthly_chars_used += len(text)
         return SynthesizeResult(
             audio_b64=self.canned_audio_b64,

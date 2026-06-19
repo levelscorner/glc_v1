@@ -6,6 +6,7 @@ provider opens a WebSocket session, sends a `setup` frame plus an
 `audioStream` frame, and accumulates transcript chunks until the
 session emits `turnComplete`.
 """
+
 from __future__ import annotations
 
 from glc.voice.stt.base import STTProvider, TranscribeResult

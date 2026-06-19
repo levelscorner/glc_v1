@@ -18,12 +18,13 @@ queue_adaptive_card_message(card)      → Activity with attachments[]
                                          carrying an Adaptive Card
                                          (content-type application/vnd.microsoft.card.adaptive)
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Any
 
-OWNER_AAD_ID = "29:42"            # `29:` is the Teams user-id prefix.
+OWNER_AAD_ID = "29:42"  # `29:` is the Teams user-id prefix.
 STRANGER_AAD_ID = "29:999"
 OWNER_ID = OWNER_AAD_ID
 STRANGER_ID = STRANGER_AAD_ID
@@ -33,9 +34,14 @@ TENANT_ID = "tenant-aaa"
 CONVERSATION_ID = "a:conv-1"
 
 
-def _activity(*, from_id: str, from_name: str, text: str | None,
-              activity_id: str = "act-1",
-              attachments: list[dict[str, Any]] | None = None) -> dict[str, Any]:
+def _activity(
+    *,
+    from_id: str,
+    from_name: str,
+    text: str | None,
+    activity_id: str = "act-1",
+    attachments: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
     body: dict[str, Any] = {
         "type": "message",
         "id": activity_id,
@@ -59,12 +65,8 @@ ADAPTIVE_CARD_SAMPLE = {
     "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
     "type": "AdaptiveCard",
     "version": "1.5",
-    "body": [
-        {"type": "TextBlock", "text": "Please review the doc.",
-         "wrap": True, "size": "Medium"}
-    ],
-    "actions": [{"type": "Action.OpenUrl", "title": "Open",
-                 "url": "https://example.com/doc"}],
+    "body": [{"type": "TextBlock", "text": "Please review the doc.", "wrap": True, "size": "Medium"}],
+    "actions": [{"type": "Action.OpenUrl", "title": "Open", "url": "https://example.com/doc"}],
 }
 
 
@@ -81,27 +83,32 @@ class TeamsMock:
         return f"act-{self._next_id}"
 
     def queue_owner_message(self, text: str = "hello") -> dict[str, Any]:
-        ev = _activity(from_id=OWNER_AAD_ID, from_name="owner", text=text,
-                       activity_id=self._id())
+        ev = _activity(from_id=OWNER_AAD_ID, from_name="owner", text=text, activity_id=self._id())
         self.inbound_events.append(ev)
         return ev
 
     def queue_stranger_message(self, text: str = "ping") -> dict[str, Any]:
-        ev = _activity(from_id=STRANGER_AAD_ID, from_name="stranger", text=text,
-                       activity_id=self._id())
+        ev = _activity(from_id=STRANGER_AAD_ID, from_name="stranger", text=text, activity_id=self._id())
         self.inbound_events.append(ev)
         return ev
 
     def queue_adaptive_card_message(
-        self, card: dict[str, Any] | None = None, body_text: str = "Please review the doc.",
+        self,
+        card: dict[str, Any] | None = None,
+        body_text: str = "Please review the doc.",
     ) -> dict[str, Any]:
         card_payload = card or ADAPTIVE_CARD_SAMPLE
         attachment = {
             "contentType": "application/vnd.microsoft.card.adaptive",
             "content": card_payload,
         }
-        ev = _activity(from_id=OWNER_AAD_ID, from_name="owner", text=None,
-                       activity_id=self._id(), attachments=[attachment])
+        ev = _activity(
+            from_id=OWNER_AAD_ID,
+            from_name="owner",
+            text=None,
+            activity_id=self._id(),
+            attachments=[attachment],
+        )
         self.inbound_events.append(ev)
         return ev
 

@@ -8,6 +8,7 @@ migration step (see schema.sql).
 
 Each append commits immediately so writes survive a hard kill.
 """
+
 from __future__ import annotations
 
 import json
@@ -83,9 +84,16 @@ class AuditStore:
                     event_type, tool, policy_verdict, params_json, result_json)
                    VALUES (?,?,?,?,?,?,?,?,?,?)""",
                 (
-                    time.time(), session_id, channel, channel_user_id, trust_level,
-                    event_type, tool, policy_verdict,
-                    _jsonify(params), _jsonify(result),
+                    time.time(),
+                    session_id,
+                    channel,
+                    channel_user_id,
+                    trust_level,
+                    event_type,
+                    tool,
+                    policy_verdict,
+                    _jsonify(params),
+                    _jsonify(result),
                 ),
             )
             return int(cur.lastrowid or 0)
@@ -110,9 +118,11 @@ def query(limit: int = 100, session_id: str | None = None, channel: str | None =
     q = "SELECT * FROM audit_log"
     where, args = [], []
     if session_id:
-        where.append("session_id=?"); args.append(session_id)
+        where.append("session_id=?")
+        args.append(session_id)
     if channel:
-        where.append("channel=?"); args.append(channel)
+        where.append("channel=?")
+        args.append(channel)
     if where:
         q += " WHERE " + " AND ".join(where)
     q += " ORDER BY ts DESC LIMIT ?"

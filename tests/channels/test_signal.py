@@ -6,6 +6,7 @@ https://github.com/AsamK/signal-cli/wiki/JSON-RPC-service
 Six structural tests + one behavioural test (DM vs group dispatch
 selection).
 """
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -15,9 +16,11 @@ import pytest
 from glc.channels.catalogue.signal.adapter import Adapter
 from glc.channels.envelope import ChannelMessage, ChannelReply
 from glc.security.pairing import get_pairing_store
-
 from tests.channels.mocks.signal_mock import (
-    GROUP_ID_B64, OWNER_ID, STRANGER_ID, SignalMock,
+    GROUP_ID_B64,
+    OWNER_ID,
+    STRANGER_ID,
+    SignalMock,
 )
 
 
@@ -122,17 +125,15 @@ async def test_channel_specific_behaviour_group_vs_dm_dispatch(mock, pair_owner)
     assert msg.metadata.get("signal_group_id") == GROUP_ID_B64
 
     # Group reply: thread_id encodes the group id
-    await adapter.send(ChannelReply(channel="signal", channel_user_id=OWNER_ID,
-                                     text="group reply", thread_id=GROUP_ID_B64))
+    await adapter.send(
+        ChannelReply(channel="signal", channel_user_id=OWNER_ID, text="group reply", thread_id=GROUP_ID_B64)
+    )
     group_body = mock.send_log[-1]
     assert (group_body.get("params") or {}).get("groupId") == GROUP_ID_B64
-    assert "recipient" not in (group_body.get("params") or {}), (
-        "group dispatch must NOT include recipient"
-    )
+    assert "recipient" not in (group_body.get("params") or {}), "group dispatch must NOT include recipient"
 
     # DM reply: no thread_id, must use recipient
-    await adapter.send(ChannelReply(channel="signal", channel_user_id=OWNER_ID,
-                                     text="dm reply"))
+    await adapter.send(ChannelReply(channel="signal", channel_user_id=OWNER_ID, text="dm reply"))
     dm_body = mock.send_log[-1]
     assert (dm_body.get("params") or {}).get("recipient") == OWNER_ID
     assert "groupId" not in (dm_body.get("params") or {})

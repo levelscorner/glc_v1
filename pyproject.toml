@@ -50,6 +50,18 @@ target-version = "py311"
 select = ["E", "F", "I", "W", "UP", "B"]
 ignore = ["E501", "B008"]
 
+[tool.ruff.lint.per-file-ignores]
+# V9-ported modules — kept verbatim from llm_gatewayV9. These have
+# pre-existing minor smells (unused intermediate variables, B904 raise-from
+# style, B023 loop-bound closures in retry logic) that we accept as-is so
+# the V9 fixes are not re-introduced during a touch-up.
+"glc/providers.py" = ["B023", "B904", "F841"]
+"glc/routes/chat.py" = ["B023", "B904", "F841"]
+"glc/embedders.py" = ["B023", "B904", "F841"]
+"glc/routing.py" = ["B023", "B904", "F841"]
+# Stub adapters intentionally redefine narrow abstract types — quiet B027.
+"glc/channels/base.py" = ["B027"]
+
 [tool.mypy]
 python_version = "3.11"
 strict = false

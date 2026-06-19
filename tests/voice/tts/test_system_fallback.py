@@ -6,6 +6,7 @@ macOS `say` / pyttsx3 provider directly and assert the always-on
 contract: a fresh install can answer `/v1/speak?prefer=fallback` on
 day one.
 """
+
 from __future__ import annotations
 
 import platform
@@ -22,6 +23,7 @@ def _can_use_system_tts() -> bool:
         return True
     try:
         import pyttsx3  # noqa: F401
+
         return True
     except Exception:
         return False
@@ -66,7 +68,8 @@ async def test_synthesize_propagates_upstream_error(monkeypatch):
     from glc.voice.tts.providers.system_fallback import adapter as sf
 
     monkeypatch.setattr(
-        sf, "platform",
+        sf,
+        "platform",
         type("P", (), {"system": staticmethod(lambda: "Linux")}),
     )
     monkeypatch.setattr(sf.shutil, "which", lambda _: None)

@@ -7,6 +7,7 @@ Adapter authors call this fake instead of the real upstream when
 mock-specific capture fields to assert the adapter dispatched the
 right shape.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -36,7 +37,7 @@ class WhisperCppMock:
             status, msg = self.upstream_failure
             raise STTError(msg, status=status)
         self.subprocess_call_count += 1
-        self.last_argv = ['whisper-cli', '-m', self.model_path, '-f', 'audio.wav', '-oj']
+        self.last_argv = ["whisper-cli", "-m", self.model_path, "-f", "audio.wav", "-oj"]
         return TranscribeResult(
             text=self.canned_transcribe_text,
             language=self.canned_language,

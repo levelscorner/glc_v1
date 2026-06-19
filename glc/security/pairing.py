@@ -7,6 +7,7 @@ the installation owner, user_paired for explicitly-paired users.
 
 The pairing store is sqlite-backed so it survives restarts.
 """
+
 from __future__ import annotations
 
 import os
@@ -75,8 +76,14 @@ class PairingStore:
                 )"""
             )
 
-    def issue_code(self, channel: str, channel_user_id: str, user_handle: str = "",
-                   *, requested_trust_level: str = "user_paired") -> tuple[str, float]:
+    def issue_code(
+        self,
+        channel: str,
+        channel_user_id: str,
+        user_handle: str = "",
+        *,
+        requested_trust_level: str = "user_paired",
+    ) -> tuple[str, float]:
         code = f"{secrets.randbelow(1_000_000):06d}"
         expires_at = time.time() + CODE_TTL_SECONDS
         with _conn() as c:
@@ -91,7 +98,8 @@ class PairingStore:
     def confirm_code(self, code: str) -> PairingRecord | None:
         with _conn() as c:
             row = c.execute(
-                "SELECT * FROM pending_codes WHERE code=?", (code,),
+                "SELECT * FROM pending_codes WHERE code=?",
+                (code,),
             ).fetchone()
             if row is None:
                 return None
@@ -103,8 +111,13 @@ class PairingStore:
                 """INSERT OR REPLACE INTO pairings
                    (channel, channel_user_id, user_handle, trust_level, paired_at)
                    VALUES (?,?,?,?,?)""",
-                (row["channel"], row["channel_user_id"], row["user_handle"],
-                 row["requested_trust_level"], paired_at),
+                (
+                    row["channel"],
+                    row["channel_user_id"],
+                    row["user_handle"],
+                    row["requested_trust_level"],
+                    paired_at,
+                ),
             )
             c.execute("DELETE FROM pending_codes WHERE code=?", (code,))
             return PairingRecord(
@@ -140,8 +153,10 @@ class PairingStore:
         with _conn() as c:
             return [
                 PairingRecord(
-                    channel=r["channel"], channel_user_id=r["channel_user_id"],
-                    user_handle=r["user_handle"] or "", trust_level=r["trust_level"],
+                    channel=r["channel"],
+                    channel_user_id=r["channel_user_id"],
+                    user_handle=r["user_handle"] or "",
+                    trust_level=r["trust_level"],
                     paired_at=float(r["paired_at"]),
                 )
                 for r in c.execute(q, args).fetchall()
@@ -152,8 +167,10 @@ class PairingStore:
             rows = c.execute("SELECT * FROM pairings").fetchall()
             return [
                 PairingRecord(
-                    channel=r["channel"], channel_user_id=r["channel_user_id"],
-                    user_handle=r["user_handle"] or "", trust_level=r["trust_level"],
+                    channel=r["channel"],
+                    channel_user_id=r["channel_user_id"],
+                    user_handle=r["user_handle"] or "",
+                    trust_level=r["trust_level"],
                     paired_at=float(r["paired_at"]),
                 )
                 for r in rows
@@ -167,8 +184,9 @@ class PairingStore:
             )
             return cur.rowcount > 0
 
-    def force_pair_owner(self, channel: str, channel_user_id: str,
-                         user_handle: str = "owner") -> PairingRecord:
+    def force_pair_owner(
+        self, channel: str, channel_user_id: str, user_handle: str = "owner"
+    ) -> PairingRecord:
         """Out-of-band pairing for the installation owner. Used by the
         installer to bootstrap the first owner identity. Not exposed
         through HTTP."""
@@ -181,8 +199,11 @@ class PairingStore:
                 (channel, channel_user_id, user_handle, "owner_paired", paired_at),
             )
         return PairingRecord(
-            channel=channel, channel_user_id=channel_user_id, user_handle=user_handle,
-            trust_level="owner_paired", paired_at=paired_at,
+            channel=channel,
+            channel_user_id=channel_user_id,
+            user_handle=user_handle,
+            trust_level="owner_paired",
+            paired_at=paired_at,
         )
 
 

@@ -11,10 +11,10 @@ trust-level classifier, policy engine, and (eventually) the agent
 runtime. For S11 the agent runtime is a stub that echoes the message
 back so adapter authors can verify their wire is plumbed correctly.
 """
+
 from __future__ import annotations
 
 import json
-from typing import Optional
 
 from fastapi import APIRouter, Query, WebSocket, WebSocketDisconnect, status
 
@@ -29,7 +29,7 @@ router = APIRouter()
 
 
 @router.websocket("/v1/channels/{name}")
-async def channel_ws(websocket: WebSocket, name: str, token: Optional[str] = Query(default=None)):
+async def channel_ws(websocket: WebSocket, name: str, token: str | None = Query(default=None)):
     header_auth = websocket.headers.get("authorization") or websocket.headers.get("Authorization")
     presented = None
     if header_auth and header_auth.startswith("Bearer "):
@@ -63,14 +63,18 @@ async def channel_ws(websocket: WebSocket, name: str, token: Optional[str] = Que
                 continue
 
             ok, why = allowed(
-                env.channel, env.channel_user_id, owner_ids=owners,
+                env.channel,
+                env.channel_user_id,
+                owner_ids=owners,
                 is_public_channel=bool(env.metadata.get("is_public_channel", False)),
                 was_mentioned=bool(env.metadata.get("was_mentioned", False)),
             )
             if not ok:
                 audit_append(
-                    channel=env.channel, channel_user_id=env.channel_user_id,
-                    trust_level=env.trust_level, event_type="allowlist_drop",
+                    channel=env.channel,
+                    channel_user_id=env.channel_user_id,
+                    trust_level=env.trust_level,
+                    event_type="allowlist_drop",
                     result={"reason": why},
                 )
                 await websocket.send_text(json.dumps({"error": f"dropped: {why}"}))
@@ -79,16 +83,20 @@ async def channel_ws(websocket: WebSocket, name: str, token: Optional[str] = Que
             ok, why = limiter.check_message(env.channel, env.channel_user_id)
             if not ok:
                 audit_append(
-                    channel=env.channel, channel_user_id=env.channel_user_id,
-                    trust_level=env.trust_level, event_type="rate_limit",
+                    channel=env.channel,
+                    channel_user_id=env.channel_user_id,
+                    trust_level=env.trust_level,
+                    event_type="rate_limit",
                     result={"reason": why},
                 )
                 await websocket.send_text(json.dumps({"status": 429, "error": why}))
                 continue
 
             audit_append(
-                channel=env.channel, channel_user_id=env.channel_user_id,
-                trust_level=env.trust_level, event_type="inbound_message",
+                channel=env.channel,
+                channel_user_id=env.channel_user_id,
+                trust_level=env.trust_level,
+                event_type="inbound_message",
                 params={"text": env.text, "thread_id": env.thread_id},
             )
 
@@ -96,7 +104,8 @@ async def channel_ws(websocket: WebSocket, name: str, token: Optional[str] = Que
             # verify the wire end-to-end. The real agent runtime hooks
             # in here in subsequent sessions.
             reply = ChannelReply(
-                channel=env.channel, channel_user_id=env.channel_user_id,
+                channel=env.channel,
+                channel_user_id=env.channel_user_id,
                 text=f"[glc echo] {env.text or ''}",
                 thread_id=env.thread_id,
             )

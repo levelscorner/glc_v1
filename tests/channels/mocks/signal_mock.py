@@ -18,12 +18,13 @@ queue_owner_message(text)              → DM notification from owner
 queue_stranger_message(text)           → DM notification from stranger
 queue_group_message(text, group_id)    → group notification with groupId
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Any
 
-OWNER_PHONE = "+19999999999"      # E.164 with leading +.
+OWNER_PHONE = "+19999999999"  # E.164 with leading +.
 STRANGER_PHONE = "+17777777777"
 OWNER_ID = OWNER_PHONE
 STRANGER_ID = STRANGER_PHONE
@@ -31,9 +32,9 @@ STRANGER_ID = STRANGER_PHONE
 GROUP_ID_B64 = "groupAbCdEf=="
 
 
-def _notification(*, source: str, source_name: str, body: str,
-                  group_id: str | None = None,
-                  timestamp: int = 1700000000000) -> dict[str, Any]:
+def _notification(
+    *, source: str, source_name: str, body: str, group_id: str | None = None, timestamp: int = 1700000000000
+) -> dict[str, Any]:
     data_message: dict[str, Any] = {
         "timestamp": timestamp,
         "message": body,
@@ -82,23 +83,24 @@ class SignalMock:
         self.inbound_events.append(ev)
         return ev
 
-    def queue_group_message(self, text: str = "hi all",
-                            group_id: str = GROUP_ID_B64,
-                            from_owner: bool = True) -> dict[str, Any]:
+    def queue_group_message(
+        self, text: str = "hi all", group_id: str = GROUP_ID_B64, from_owner: bool = True
+    ) -> dict[str, Any]:
         sender = (OWNER_PHONE, "owner") if from_owner else (STRANGER_PHONE, "stranger")
-        ev = _notification(source=sender[0], source_name=sender[1],
-                           body=text, group_id=group_id)
+        ev = _notification(source=sender[0], source_name=sender[1], body=text, group_id=group_id)
         self.inbound_events.append(ev)
         return ev
 
     async def send(self, payload: dict[str, Any]) -> dict[str, Any]:
         if self.rate_limited:
-            return {"jsonrpc": "2.0", "id": payload.get("id"),
-                    "error": {"code": -32603, "message": "rate limited"},
-                    "status": 429}
+            return {
+                "jsonrpc": "2.0",
+                "id": payload.get("id"),
+                "error": {"code": -32603, "message": "rate limited"},
+                "status": 429,
+            }
         self.send_log.append(payload)
-        return {"jsonrpc": "2.0", "id": payload.get("id"),
-                "result": {"timestamp": 1700000000999}}
+        return {"jsonrpc": "2.0", "id": payload.get("id"), "result": {"timestamp": 1700000000999}}
 
     def force_disconnect(self) -> None:
         self._disconnect_pending = True

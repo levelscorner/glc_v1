@@ -4,6 +4,7 @@ Group assignment: implement `transcribe(audio, mime)` against the
 mock-API fake in tests/voice/stt/mocks/groq_whisper_mock.py. See
 docs/ADAPTER_GUIDE.md §voice for the standard workflow.
 """
+
 from __future__ import annotations
 
 from glc.voice.stt.base import STTProvider, TranscribeResult

@@ -6,6 +6,7 @@ https://api.slack.com/methods/chat.postMessage
 
 Six structural tests + one behavioural test (thread continuity).
 """
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -15,7 +16,6 @@ import pytest
 from glc.channels.catalogue.slack.adapter import Adapter
 from glc.channels.envelope import ChannelMessage, ChannelReply
 from glc.security.pairing import get_pairing_store
-
 from tests.channels.mocks.slack_mock import OWNER_ID, STRANGER_ID, SlackMock
 
 
@@ -117,8 +117,9 @@ async def test_channel_specific_behaviour_thread_continuity(mock, pair_owner):
     assert msg is not None
     assert msg.thread_id == "1700000000.000050"
 
-    reply = ChannelReply(channel="slack", channel_user_id=OWNER_ID,
-                          text="threaded reply", thread_id=msg.thread_id)
+    reply = ChannelReply(
+        channel="slack", channel_user_id=OWNER_ID, text="threaded reply", thread_id=msg.thread_id
+    )
     await adapter.send(reply)
     body = mock.send_log[-1]
     assert body.get("thread_ts") == "1700000000.000050", (

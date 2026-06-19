@@ -20,12 +20,11 @@ CI usage:
       > scorecard.md
   gh pr comment "$PR_NUMBER" --body-file scorecard.md
 """
+
 from __future__ import annotations
 
 import argparse
-import json
 import re
-import shutil
 import subprocess
 from pathlib import Path
 
@@ -38,12 +37,9 @@ DEMO_RE = re.compile(r"(youtube\.com|youtu\.be|loom\.com|vimeo\.com)", re.IGNORE
 def _slot_to_test_paths(slot: str) -> tuple[str | None, str | None]:
     """Returns (test_file_path, adapter_dir_path) or (None, None)."""
     candidates: list[tuple[Path, Path]] = [
-        (ROOT / "tests/channels" / f"test_{slot}.py",
-         ROOT / "glc/channels/catalogue" / slot),
-        (ROOT / "tests/voice/stt" / f"test_{slot}.py",
-         ROOT / "glc/voice/stt/providers" / slot),
-        (ROOT / "tests/voice/tts" / f"test_{slot}.py",
-         ROOT / "glc/voice/tts/providers" / slot),
+        (ROOT / "tests/channels" / f"test_{slot}.py", ROOT / "glc/channels/catalogue" / slot),
+        (ROOT / "tests/voice/stt" / f"test_{slot}.py", ROOT / "glc/voice/stt/providers" / slot),
+        (ROOT / "tests/voice/tts" / f"test_{slot}.py", ROOT / "glc/voice/tts/providers" / slot),
     ]
     for test_path, adapter_dir in candidates:
         if test_path.exists():
@@ -114,15 +110,16 @@ def _discipline_score(adapter_dir: str) -> tuple[float, list[str]]:
     return round(max(0.0, score), 2), notes
 
 
-def build_scorecard(*, pr_body: str, base: str, head: str,
-                    pr_number: str | None = None) -> str:
+def build_scorecard(*, pr_body: str, base: str, head: str, pr_number: str | None = None) -> str:
     group_m = GROUP_MARKER_RE.search(pr_body)
     slot_m = SLOT_MARKER_RE.search(pr_body)
     group = group_m.group(1) if group_m else "(unknown group)"
     slot = slot_m.group(1) if slot_m else None
 
     lines: list[str] = ["## GLC scorecard", ""]
-    lines.append(f"**Group**: `{group}`  ·  **Slot**: `{slot or '(unknown)'}`  ·  **PR**: #{pr_number or '?'}")
+    lines.append(
+        f"**Group**: `{group}`  ·  **Slot**: `{slot or '(unknown)'}`  ·  **PR**: #{pr_number or '?'}"
+    )
     lines.append("")
 
     if slot is None:
@@ -135,10 +132,12 @@ def build_scorecard(*, pr_body: str, base: str, head: str,
         return "\n".join(lines)
 
     report = _pytest_report(test_path)
-    structural = [t for t in report["passed"] + report["failed"]
-                   if not t.endswith("channel_specific_behaviour") and "behaviour" not in t]
-    behavioural = [t for t in report["passed"] + report["failed"]
-                    if "behaviour" in t]
+    structural = [
+        t
+        for t in report["passed"] + report["failed"]
+        if not t.endswith("channel_specific_behaviour") and "behaviour" not in t
+    ]
+    behavioural = [t for t in report["passed"] + report["failed"] if "behaviour" in t]
 
     s_passed = [t for t in structural if t in report["passed"]]
     s_failed = [t for t in structural if t in report["failed"]]
@@ -153,24 +152,33 @@ def build_scorecard(*, pr_body: str, base: str, head: str,
     template_pts, template_missing = _pr_template_score(pr_body)
     discipline_pts, discipline_notes = _discipline_score(adapter_dir)
 
-    total = round(structural_pts + behavioural_pts + (0.5 if ruff_ok else 0)
-                  + (0.5 if mypy_ok else 0) + template_pts + discipline_pts, 2)
+    total = round(
+        structural_pts
+        + behavioural_pts
+        + (0.5 if ruff_ok else 0)
+        + (0.5 if mypy_ok else 0)
+        + template_pts
+        + discipline_pts,
+        2,
+    )
 
     def tick(ok: bool) -> str:
         return "✓" if ok else "✗"
 
-    lines.extend([
-        "| Item                                | Result | Points |",
-        "|-------------------------------------|--------|--------|",
-        f"| Structural tests ({len(s_passed)}/{len(structural)})   | {tick(not s_failed)}      | {structural_pts}/6   |",
-        f"| Behavioural test                    | {tick(bool(b_passed) and not b_failed)}      | {behavioural_pts}/2     |",
-        f"| `ruff check {adapter_dir}`          | {tick(ruff_ok)}      | {0.5 if ruff_ok else 0}/0.5 |",
-        f"| `mypy {adapter_dir}`                | {tick(mypy_ok)}      | {0.5 if mypy_ok else 0}/0.5 |",
-        f"| PR template completeness            | {tick(not template_missing)}      | {template_pts}/0.5  |",
-        f"| Adapter discipline                  | {tick(not discipline_notes)}      | {discipline_pts}/0.5  |",
-        f"| **Total**                           |        | **{total}/10** |",
-        "",
-    ])
+    lines.extend(
+        [
+            "| Item                                | Result | Points |",
+            "|-------------------------------------|--------|--------|",
+            f"| Structural tests ({len(s_passed)}/{len(structural)})   | {tick(not s_failed)}      | {structural_pts}/6   |",
+            f"| Behavioural test                    | {tick(bool(b_passed) and not b_failed)}      | {behavioural_pts}/2     |",
+            f"| `ruff check {adapter_dir}`          | {tick(ruff_ok)}      | {0.5 if ruff_ok else 0}/0.5 |",
+            f"| `mypy {adapter_dir}`                | {tick(mypy_ok)}      | {0.5 if mypy_ok else 0}/0.5 |",
+            f"| PR template completeness            | {tick(not template_missing)}      | {template_pts}/0.5  |",
+            f"| Adapter discipline                  | {tick(not discipline_notes)}      | {discipline_pts}/0.5  |",
+            f"| **Total**                           |        | **{total}/10** |",
+            "",
+        ]
+    )
 
     if s_failed:
         lines.append("### Failing structural tests")
@@ -194,10 +202,7 @@ def build_scorecard(*, pr_body: str, base: str, head: str,
         lines.append("")
 
     lines.append("---")
-    lines.append(
-        f"_Scorecard generated by `scripts/scorecard.py`. Diff range: "
-        f"`{base}..{head}`._"
-    )
+    lines.append(f"_Scorecard generated by `scripts/scorecard.py`. Diff range: `{base}..{head}`._")
     return "\n".join(lines)
 
 
@@ -208,13 +213,18 @@ def main() -> int:
     ap.add_argument("--base", default="origin/main")
     ap.add_argument("--head", default="HEAD")
     args = ap.parse_args()
-    print(build_scorecard(
-        pr_body=args.pr_body, base=args.base, head=args.head,
-        pr_number=args.pr_number,
-    ))
+    print(
+        build_scorecard(
+            pr_body=args.pr_body,
+            base=args.base,
+            head=args.head,
+            pr_number=args.pr_number,
+        )
+    )
     return 0
 
 
 if __name__ == "__main__":
     import sys
+
     sys.exit(main())

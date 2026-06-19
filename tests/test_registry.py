@@ -1,4 +1,5 @@
 """Channel registry discovery."""
+
 from __future__ import annotations
 
 from glc.channels.base import ChannelAdapter
@@ -34,5 +35,6 @@ def test_instantiate_returns_adapter():
 
 def test_instantiate_unknown_raises():
     import pytest
+
     with pytest.raises(KeyError):
         instantiate("definitely_unknown", config={})

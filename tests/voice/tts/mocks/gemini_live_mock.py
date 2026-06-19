@@ -2,6 +2,7 @@
 
 Wire-format source: https://ai.google.dev/api/multimodal-live
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -12,7 +13,7 @@ from glc.voice.tts.base import SynthesizeResult, TTSError
 
 @dataclass
 class GeminiLiveMock:
-    canned_audio_b64: str = "QUFBQQ=="    # base64("AAAA")
+    canned_audio_b64: str = "QUFBQQ=="  # base64("AAAA")
     canned_mime: str = "audio/wav"
     canned_sample_rate: int = 24000
     received_calls: list[dict[str, Any]] = field(default_factory=list)

@@ -23,6 +23,7 @@ queue_media_frame(audio_bytes)    → WS media frame with base64 audio
 transcribe(audio_bytes)           → synthetic STT for the media test
 store_artifact(sha, data)         → artifact handle
 """
+
 from __future__ import annotations
 
 import base64
@@ -52,8 +53,7 @@ def _call_form(*, from_phone: str, call_sid: str = CALL_SID) -> dict[str, Any]:
     }
 
 
-def _media_frame(*, audio_bytes: bytes, stream_sid: str = STREAM_SID,
-                 chunk: int = 1) -> dict[str, Any]:
+def _media_frame(*, audio_bytes: bytes, stream_sid: str = STREAM_SID, chunk: int = 1) -> dict[str, Any]:
     return {
         "event": "media",
         "sequenceNumber": str(chunk),

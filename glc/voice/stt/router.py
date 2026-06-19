@@ -13,17 +13,17 @@ by raising a clear STTError with a pointer.
 Tests inject fakes by patching `_load_provider` or by registering a
 provider into `_TEST_PROVIDERS`.
 """
+
 from __future__ import annotations
 
 import importlib
-from typing import Any
 
 from glc.voice.stt.base import STTError, STTProvider, TranscribeResult
 
 PREFER_TO_PROVIDER: dict[str, str] = {
-    "default":   "groq_whisper",
-    "local":     "whisper_cpp",
-    "streaming": "gemini_live",   # behavioural note below
+    "default": "groq_whisper",
+    "local": "whisper_cpp",
+    "streaming": "gemini_live",  # behavioural note below
 }
 
 PROVIDERS_PACKAGE = "glc.voice.stt.providers"
@@ -55,9 +55,7 @@ def _load_provider(name: str) -> STTProvider:
 
 async def transcribe(audio: bytes, mime: str, prefer: str = "default") -> TranscribeResult:
     if prefer not in PREFER_TO_PROVIDER:
-        raise STTError(
-            f"unknown prefer={prefer!r}. Pick one of: {list(PREFER_TO_PROVIDER)}"
-        )
+        raise STTError(f"unknown prefer={prefer!r}. Pick one of: {list(PREFER_TO_PROVIDER)}")
     name = PREFER_TO_PROVIDER[prefer]
     # `streaming` belongs on the Gemini Live WebSocket route, not this
     # synchronous endpoint. The dispatcher refuses cleanly so callers
@@ -80,8 +78,7 @@ async def transcribe(audio: bytes, mime: str, prefer: str = "default") -> Transc
     return await _safe_transcribe(provider, audio, mime, name)
 
 
-async def _safe_transcribe(provider: STTProvider, audio: bytes, mime: str,
-                            name: str) -> TranscribeResult:
+async def _safe_transcribe(provider: STTProvider, audio: bytes, mime: str, name: str) -> TranscribeResult:
     try:
         return await provider.transcribe(audio, mime)
     except NotImplementedError as e:
@@ -109,9 +106,8 @@ async def _call_groq(audio: bytes, mime: str) -> TranscribeResult:  # pragma: no
 
 def _call_whisper_cpp(audio: bytes, mime: str) -> TranscribeResult:  # pragma: no cover
     import asyncio
-    return asyncio.get_event_loop().run_until_complete(
-        _load_provider("whisper_cpp").transcribe(audio, mime)
-    )
+
+    return asyncio.get_event_loop().run_until_complete(_load_provider("whisper_cpp").transcribe(audio, mime))
 
 
 __all__ = [

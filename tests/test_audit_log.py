@@ -1,9 +1,7 @@
 """Append-only audit log — write correctness, restart survival,
 no-update/no-delete surface."""
-from __future__ import annotations
 
-import os
-import sqlite3
+from __future__ import annotations
 
 from glc.audit import store
 from glc.audit.store import AuditStore, append, init_store, query, schema_version
@@ -12,8 +10,12 @@ from glc.audit.store import AuditStore, append, init_store, query, schema_versio
 def test_init_then_append():
     init_store()
     rid = append(
-        channel="telegram", channel_user_id="42", trust_level="owner_paired",
-        event_type="inbound_message", session_id="s1", params={"text": "hi"},
+        channel="telegram",
+        channel_user_id="42",
+        trust_level="owner_paired",
+        event_type="inbound_message",
+        session_id="s1",
+        params={"text": "hi"},
     )
     assert rid > 0
     rows = query(limit=5)
@@ -24,8 +26,7 @@ def test_init_then_append():
 
 def test_write_survives_restart(monkeypatch, tmp_path):
     init_store()
-    append(channel="x", channel_user_id="1", trust_level="owner_paired",
-           event_type="boot")
+    append(channel="x", channel_user_id="1", trust_level="owner_paired", event_type="boot")
     store._singleton = None  # simulate process restart
     rows = query(limit=10)
     assert len(rows) == 1
@@ -47,10 +48,12 @@ def test_schema_version_is_one():
 
 def test_query_filters_by_session_and_channel():
     init_store()
-    append(channel="discord", channel_user_id="1", trust_level="owner_paired",
-           event_type="x", session_id="s-A")
-    append(channel="telegram", channel_user_id="1", trust_level="owner_paired",
-           event_type="x", session_id="s-B")
+    append(
+        channel="discord", channel_user_id="1", trust_level="owner_paired", event_type="x", session_id="s-A"
+    )
+    append(
+        channel="telegram", channel_user_id="1", trust_level="owner_paired", event_type="x", session_id="s-B"
+    )
     rows = query(session_id="s-A")
     assert len(rows) == 1
     assert rows[0]["channel"] == "discord"
@@ -60,7 +63,12 @@ def test_query_filters_by_session_and_channel():
 
 def test_jsonifies_complex_params():
     init_store()
-    append(channel="x", channel_user_id="1", trust_level="owner_paired",
-           event_type="x", params={"nested": {"k": [1, 2, 3]}})
+    append(
+        channel="x",
+        channel_user_id="1",
+        trust_level="owner_paired",
+        event_type="x",
+        params={"nested": {"k": [1, 2, 3]}},
+    )
     rows = query(limit=1)
     assert "nested" in rows[0]["params_json"]

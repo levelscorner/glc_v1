@@ -8,14 +8,13 @@ The actual model loader is delegated to the `kokoro` PyPI package. We
 import it inside the function so the gateway boot does not pay the
 import cost on installs that don't use TTS.
 """
+
 from __future__ import annotations
 
 import os
 from pathlib import Path
 
-MODEL_DIR = Path(os.path.expanduser(
-    os.getenv("GLC_KOKORO_MODEL_DIR", "~/.glc/models/kokoro-82M")
-))
+MODEL_DIR = Path(os.path.expanduser(os.getenv("GLC_KOKORO_MODEL_DIR", "~/.glc/models/kokoro-82M")))
 
 _pipeline = None
 

@@ -25,6 +25,7 @@ register_message(message_id, raw)      → seed the messages store for
 history_list(start_history_id)         → mirrors users.history.list
 messages_get(message_id)               → mirrors users.messages.get
 """
+
 from __future__ import annotations
 
 import base64
@@ -41,8 +42,7 @@ STRANGER_ID = STRANGER_EMAIL
 BOT_EMAIL = "bot@example.com"
 
 
-def _build_multipart(*, from_addr: str, to_addr: str, subject: str,
-                     text_body: str, html_body: str) -> bytes:
+def _build_multipart(*, from_addr: str, to_addr: str, subject: str, text_body: str, html_body: str) -> bytes:
     msg = EmailMessage()
     msg["From"] = from_addr
     msg["To"] = to_addr
@@ -53,8 +53,7 @@ def _build_multipart(*, from_addr: str, to_addr: str, subject: str,
     return bytes(msg)
 
 
-def _pubsub_push(*, email_address: str, history_id: int,
-                 message_id: str) -> dict[str, Any]:
+def _pubsub_push(*, email_address: str, history_id: int, message_id: str) -> dict[str, Any]:
     inner = {"emailAddress": email_address, "historyId": history_id}
     data = base64.b64encode(json.dumps(inner).encode()).decode()
     return {
@@ -87,8 +86,7 @@ class GmailMock:
         self._next_msg += 1
         return f"msg-{self._next_msg}"
 
-    def register_message(self, message_id: str, raw_bytes: bytes,
-                         from_addr: str, history_id: int) -> None:
+    def register_message(self, message_id: str, raw_bytes: bytes, from_addr: str, history_id: int) -> None:
         # Gmail's API stores `raw` as base64url (no padding).
         raw_b64url = base64.urlsafe_b64encode(raw_bytes).decode().rstrip("=")
         self._messages[message_id] = {
@@ -104,8 +102,10 @@ class GmailMock:
         msg_id = self._m()
         history_id = self._h()
         raw = _build_multipart(
-            from_addr=from_addr, to_addr=BOT_EMAIL,
-            subject="ping", text_body=text,
+            from_addr=from_addr,
+            to_addr=BOT_EMAIL,
+            subject="ping",
+            text_body=text,
             html_body=f"<p>{text}</p><p>--<br>(html part the adapter must ignore)</p>",
         )
         self.register_message(msg_id, raw, from_addr, history_id)
@@ -113,15 +113,13 @@ class GmailMock:
 
     def queue_owner_message(self, text: str = "hello") -> dict[str, Any]:
         msg_id, history_id = self._seed_message(from_addr=OWNER_EMAIL, text=text)
-        ev = _pubsub_push(email_address=BOT_EMAIL, history_id=history_id,
-                          message_id=msg_id)
+        ev = _pubsub_push(email_address=BOT_EMAIL, history_id=history_id, message_id=msg_id)
         self.inbound_events.append(ev)
         return ev
 
     def queue_stranger_message(self, text: str = "ping") -> dict[str, Any]:
         msg_id, history_id = self._seed_message(from_addr=STRANGER_EMAIL, text=text)
-        ev = _pubsub_push(email_address=BOT_EMAIL, history_id=history_id,
-                          message_id=msg_id)
+        ev = _pubsub_push(email_address=BOT_EMAIL, history_id=history_id, message_id=msg_id)
         self.inbound_events.append(ev)
         return ev
 
@@ -129,9 +127,10 @@ class GmailMock:
         new_msgs = self._history.get(start_history_id) or []
         return {
             "history": [
-                {"id": str(start_history_id),
-                 "messagesAdded": [{"message": {"id": m, "threadId": "thread-" + m}}
-                                   for m in new_msgs]}
+                {
+                    "id": str(start_history_id),
+                    "messagesAdded": [{"message": {"id": m, "threadId": "thread-" + m}} for m in new_msgs],
+                }
             ],
             "historyId": str(start_history_id),
         }
@@ -144,8 +143,7 @@ class GmailMock:
 
     async def send(self, payload: dict[str, Any]) -> dict[str, Any]:
         if self.rate_limited:
-            return {"error": {"code": 429, "message": "User-rate limit exceeded"},
-                    "status": 429}
+            return {"error": {"code": 429, "message": "User-rate limit exceeded"}, "status": 429}
         self.send_log.append(payload)
         return {"id": self._m(), "threadId": "thread-out", "labelIds": ["SENT"]}
 

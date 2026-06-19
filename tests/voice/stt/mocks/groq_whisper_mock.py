@@ -7,6 +7,7 @@ Adapter authors call this fake instead of the real upstream when
 mock-specific capture fields to assert the adapter dispatched the
 right shape.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -36,9 +37,9 @@ class GroqWhisperMock:
         if self.upstream_failure is not None:
             status, msg = self.upstream_failure
             raise STTError(msg, status=status)
-        self.received_multipart = {'file_bytes': audio, 'mime': mime}
+        self.received_multipart = {"file_bytes": audio, "mime": mime}
         self.last_model = self.canned_model
-        self.last_response_format = 'verbose_json'
+        self.last_response_format = "verbose_json"
         return TranscribeResult(
             text=self.canned_transcribe_text,
             language=self.canned_language,

@@ -9,6 +9,7 @@ Recognised paths:
   tests/voice/stt/test_<name>.py -> glc.voice.stt.providers.<name>.adapter
   tests/voice/tts/test_<name>.py -> glc.voice.tts.providers.<name>.adapter
 """
+
 from __future__ import annotations
 
 import importlib
@@ -35,6 +36,6 @@ def pytest_collectstart(collector):  # pragma: no cover
         importlib.import_module(f"glc.voice.{kind}.providers.{provider}.adapter")
     except Exception as e:
         pytest.skip(
-            f"voice provider glc.voice.{kind}.providers.{provider}.adapter "
-            f"failed to import: {e!r}", allow_module_level=True,
+            f"voice provider glc.voice.{kind}.providers.{provider}.adapter failed to import: {e!r}",
+            allow_module_level=True,
         )

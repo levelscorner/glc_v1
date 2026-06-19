@@ -4,12 +4,12 @@
 All endpoints require the installation token (Authorization: Bearer ...).
 The kill endpoint binds 127.0.0.1 only; the host check is enforced here.
 """
+
 from __future__ import annotations
 
 import os
 import signal
 import time
-from typing import Optional
 
 from fastapi import APIRouter, Header, HTTPException, Request
 from pydantic import BaseModel
@@ -20,7 +20,7 @@ from glc.security.pairing import CODE_TTL_SECONDS, get_pairing_store
 router = APIRouter()
 
 
-def _require_token(authorization: Optional[str]) -> None:
+def _require_token(authorization: str | None) -> None:
     expected = get_or_create_install_token()
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(401, "missing bearer token (Authorization: Bearer <install_token>)")
@@ -47,19 +47,21 @@ class PairConfirmRequest(BaseModel):
 
 
 @router.post("/v1/control/pair", response_model=PairResponse)
-async def pair(req: PairRequest, authorization: Optional[str] = Header(default=None)):
+async def pair(req: PairRequest, authorization: str | None = Header(default=None)):
     _require_token(authorization)
     if req.trust_level not in ("user_paired", "owner_paired"):
         raise HTTPException(400, f"trust_level must be user_paired or owner_paired, got {req.trust_level!r}")
     code, expires_at = get_pairing_store().issue_code(
-        req.channel, req.channel_user_id, req.user_handle,
+        req.channel,
+        req.channel_user_id,
+        req.user_handle,
         requested_trust_level=req.trust_level,
     )
     return PairResponse(code=code, expires_at=expires_at, ttl_seconds=CODE_TTL_SECONDS)
 
 
 @router.post("/v1/control/pair/confirm")
-async def pair_confirm(req: PairConfirmRequest, authorization: Optional[str] = Header(default=None)):
+async def pair_confirm(req: PairConfirmRequest, authorization: str | None = Header(default=None)):
     _require_token(authorization)
     rec = get_pairing_store().confirm_code(req.code)
     if rec is None:
@@ -74,7 +76,7 @@ async def pair_confirm(req: PairConfirmRequest, authorization: Optional[str] = H
 
 
 @router.get("/v1/control/presence")
-async def presence(request: Request, authorization: Optional[str] = Header(default=None)):
+async def presence(request: Request, authorization: str | None = Header(default=None)):
     _require_token(authorization)
     state = request.app.state
     started = getattr(state, "started_at", time.time())
@@ -82,8 +84,12 @@ async def presence(request: Request, authorization: Optional[str] = Header(defau
     return {
         "channels": getattr(state, "registered_channels", []),
         "paired_users": [
-            {"channel": p.channel, "channel_user_id": p.channel_user_id,
-             "user_handle": p.user_handle, "trust_level": p.trust_level}
+            {
+                "channel": p.channel,
+                "channel_user_id": p.channel_user_id,
+                "user_handle": p.user_handle,
+                "trust_level": p.trust_level,
+            }
             for p in pairings
         ],
         "uptime_s": int(time.time() - started),
@@ -91,7 +97,7 @@ async def presence(request: Request, authorization: Optional[str] = Header(defau
 
 
 @router.post("/v1/control/kill")
-async def kill(request: Request, authorization: Optional[str] = Header(default=None)):
+async def kill(request: Request, authorization: str | None = Header(default=None)):
     _require_token(authorization)
     client_host = request.client.host if request.client else "unknown"
     if os.getenv("GLC_KILL_ALLOW_REMOTE") != "1" and client_host not in ("127.0.0.1", "::1", "localhost"):

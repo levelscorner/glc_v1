@@ -3,13 +3,13 @@
 Six structural tests + one behavioural test (pipeline_reuse).
 Wire-format source: https://github.com/hexgrad/kokoro.
 """
+
 from __future__ import annotations
 
 import pytest
 
 from glc.voice.tts.base import SynthesizeResult, TTSError
 from glc.voice.tts.providers.kokoro.adapter import Provider
-
 from tests.voice.tts.mocks.kokoro_mock import KokoroMock
 
 

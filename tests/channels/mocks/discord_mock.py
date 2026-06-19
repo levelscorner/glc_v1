@@ -21,12 +21,13 @@ register_user(user_id, username)       → seed the user directory the
 get_user(user_id)                      → returns a Discord User object,
                                          or None if unknown
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Any
 
-OWNER_DISCORD_ID = "42"          # Discord snowflakes are strings.
+OWNER_DISCORD_ID = "42"  # Discord snowflakes are strings.
 STRANGER_DISCORD_ID = "999"
 OWNER_ID = OWNER_DISCORD_ID
 STRANGER_ID = STRANGER_DISCORD_ID
@@ -37,14 +38,22 @@ CHANNEL_ID = "444555666"
 
 def _user(user_id: str, username: str, discriminator: str = "0001") -> dict[str, Any]:
     return {
-        "id": user_id, "username": username, "discriminator": discriminator,
-        "global_name": username.capitalize(), "avatar": None, "bot": False,
+        "id": user_id,
+        "username": username,
+        "discriminator": discriminator,
+        "global_name": username.capitalize(),
+        "avatar": None,
+        "bot": False,
     }
 
 
-def _message_create(*, author: dict[str, Any], content: str,
-                    mentions: list[dict[str, Any]] | None = None,
-                    message_id: str = "msg-1") -> dict[str, Any]:
+def _message_create(
+    *,
+    author: dict[str, Any],
+    content: str,
+    mentions: list[dict[str, Any]] | None = None,
+    message_id: str = "msg-1",
+) -> dict[str, Any]:
     return {
         "op": 0,
         "t": "MESSAGE_CREATE",
@@ -96,19 +105,18 @@ class DiscordMock:
         return dict(u) if u else None
 
     def queue_owner_message(self, text: str = "hello") -> dict[str, Any]:
-        ev = _message_create(author=self._users[OWNER_DISCORD_ID], content=text,
-                             message_id=self._msg_id())
+        ev = _message_create(author=self._users[OWNER_DISCORD_ID], content=text, message_id=self._msg_id())
         self.inbound_events.append(ev)
         return ev
 
     def queue_stranger_message(self, text: str = "ping") -> dict[str, Any]:
-        ev = _message_create(author=self._users[STRANGER_DISCORD_ID], content=text,
-                             message_id=self._msg_id())
+        ev = _message_create(author=self._users[STRANGER_DISCORD_ID], content=text, message_id=self._msg_id())
         self.inbound_events.append(ev)
         return ev
 
-    def queue_mention_message(self, mentioned_user_id: str = "123456789",
-                              mentioned_username: str = "alice") -> dict[str, Any]:
+    def queue_mention_message(
+        self, mentioned_user_id: str = "123456789", mentioned_username: str = "alice"
+    ) -> dict[str, Any]:
         """Owner sends a message that mentions another user. Discord
         formats this as `<@USERID>` inline plus a `mentions` array of
         User objects in the dispatch payload."""
@@ -127,8 +135,13 @@ class DiscordMock:
     async def send(self, payload: dict[str, Any]) -> dict[str, Any]:
         if self.rate_limited:
             # Real Discord 429 body shape.
-            return {"status": 429, "message": "You are being rate limited.",
-                    "retry_after": 1.234, "global": False, "code": 0}
+            return {
+                "status": 429,
+                "message": "You are being rate limited.",
+                "retry_after": 1.234,
+                "global": False,
+                "code": 0,
+            }
         self.send_log.append(payload)
         return {
             "id": self._msg_id(),

@@ -2,6 +2,7 @@
 as-is (S9 Browser / S10 Computer-Use clients work unchanged); the new
 S11 surfaces (transcribe, speak, channels WS, control) sit alongside.
 """
+
 from __future__ import annotations
 
 import os
@@ -103,4 +104,5 @@ async def healthz():
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run("glc.main:app", host="0.0.0.0", port=PORT, reload=False)

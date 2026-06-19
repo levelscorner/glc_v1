@@ -2,6 +2,7 @@
 runtime. Lecture §8 documents the shape. Adapters import these types and
 the test suite asserts adapter output conforms.
 """
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -16,6 +17,7 @@ class Attachment(BaseModel):
     """A non-text payload attached to a message. `ref` is either an
     art:... handle that the gateway can resolve to bytes via the artifact
     store, or an external URL the receiving side can fetch."""
+
     kind: Literal["image", "audio", "video", "file", "location"]
     ref: str
     mime: str | None = None

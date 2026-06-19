@@ -5,6 +5,7 @@ in docs/ADAPTER_GUIDE.md §WebUI.
 
 Six structural tests + one behavioural test (typing indicator pre-frame).
 """
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -14,7 +15,6 @@ import pytest
 from glc.channels.catalogue.webui.adapter import Adapter
 from glc.channels.envelope import ChannelMessage, ChannelReply
 from glc.security.pairing import get_pairing_store
-
 from tests.channels.mocks.webui_mock import OWNER_ID, STRANGER_ID, WebuiMock
 
 

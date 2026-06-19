@@ -7,6 +7,7 @@ be overridden per channel.
 The interceptor sits *before* the policy engine so a rate-limited call
 short-circuits to 429 without consuming any policy or LLM budget.
 """
+
 from __future__ import annotations
 
 import threading
@@ -79,6 +80,7 @@ def get_rate_limiter() -> RateLimiter:
     global _limiter
     if _limiter is None:
         from glc.config import load_channels
+
         _limiter = RateLimiter()
         _limiter.configure_from_yaml(load_channels())
     return _limiter

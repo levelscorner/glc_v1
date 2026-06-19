@@ -7,6 +7,7 @@ https://www.twilio.com/docs/voice/twiml/stream
 Six structural tests + one behavioural test (TwiML on call-in,
 media-stream frame → ChannelMessage with voice_audio_ref).
 """
+
 from __future__ import annotations
 
 import re
@@ -17,9 +18,10 @@ import pytest
 from glc.channels.catalogue.twilio_voice.adapter import Adapter
 from glc.channels.envelope import ChannelMessage, ChannelReply
 from glc.security.pairing import get_pairing_store
-
 from tests.channels.mocks.twilio_voice_mock import (
-    OWNER_ID, STRANGER_ID, TwilioVoiceMock,
+    OWNER_ID,
+    STRANGER_ID,
+    TwilioVoiceMock,
 )
 
 
@@ -117,11 +119,10 @@ async def test_channel_specific_behaviour_call_to_twiml_then_media(mock, pair_ow
 
     # Step 1: incoming call should produce TwiML with a <Stream> element.
     ev = mock.queue_owner_message("ringing")
-    msg = await adapter.on_message(ev)
+    await adapter.on_message(ev)
     # The adapter may emit a "call started" envelope here OR open the
     # TwiML response side-channel via send_log — accept either.
-    reply = ChannelReply(channel="twilio_voice", channel_user_id=OWNER_ID,
-                          text="hi caller")
+    reply = ChannelReply(channel="twilio_voice", channel_user_id=OWNER_ID, text="hi caller")
     await adapter.send(reply)
     twiml = mock.send_log[-1].get("twiml") if isinstance(mock.send_log[-1], dict) else mock.send_log[-1]
     assert twiml and re.search(r"<(Connect|Start)>\s*<Stream", twiml or ""), (

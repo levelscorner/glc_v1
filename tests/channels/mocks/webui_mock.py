@@ -15,12 +15,13 @@ The mock records every frame the adapter dispatches in `send_log`
 so the behavioural test can assert the typing-indicator pre-frame
 arrives before the final reply frame.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Any
 
-OWNER_USER_ID = "owner"        # WebUI is owner-only by default.
+OWNER_USER_ID = "owner"  # WebUI is owner-only by default.
 STRANGER_USER_ID = "guest"
 OWNER_ID = OWNER_USER_ID
 STRANGER_ID = STRANGER_USER_ID
@@ -60,8 +61,7 @@ class WebuiMock:
 
     async def send(self, payload: dict[str, Any]) -> dict[str, Any]:
         if self.rate_limited:
-            return {"type": "error", "code": 429,
-                    "error": "rate limited", "status": 429}
+            return {"type": "error", "code": 429, "error": "rate limited", "status": 429}
         self.send_log.append(payload)
         return {"type": "ack", "id": f"frame-{len(self.send_log)}"}
 

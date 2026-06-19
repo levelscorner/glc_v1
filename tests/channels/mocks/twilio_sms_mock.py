@@ -20,6 +20,7 @@ download(url)                          → returns synthetic image bytes
                                          registered against the URL
 store_artifact(sha, data)              → artifact handle
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -48,15 +49,22 @@ def _sms_form(*, from_phone: str, body: str, message_sid: str = "SM01") -> dict[
     }
 
 
-def _mms_form(*, from_phone: str, body: str, media_url: str,
-              media_content_type: str = "image/jpeg",
-              message_sid: str = "MM01") -> dict[str, Any]:
+def _mms_form(
+    *,
+    from_phone: str,
+    body: str,
+    media_url: str,
+    media_content_type: str = "image/jpeg",
+    message_sid: str = "MM01",
+) -> dict[str, Any]:
     form = _sms_form(from_phone=from_phone, body=body, message_sid=message_sid)
-    form.update({
-        "NumMedia": "1",
-        "MediaUrl0": media_url,
-        "MediaContentType0": media_content_type,
-    })
+    form.update(
+        {
+            "NumMedia": "1",
+            "MediaUrl0": media_url,
+            "MediaContentType0": media_content_type,
+        }
+    )
     return form
 
 
@@ -84,12 +92,14 @@ class TwilioSmsMock:
         self.inbound_events.append(ev)
         return ev
 
-    def queue_mms_message(self, body: str = "see photo",
-                           media_url: str = "https://api.twilio.com/Media/IM01.jpg",
-                           media_bytes: bytes = b"\xff\xd8\xff synthetic jpeg") -> dict[str, Any]:
+    def queue_mms_message(
+        self,
+        body: str = "see photo",
+        media_url: str = "https://api.twilio.com/Media/IM01.jpg",
+        media_bytes: bytes = b"\xff\xd8\xff synthetic jpeg",
+    ) -> dict[str, Any]:
         self.media_store[media_url] = media_bytes
-        ev = _mms_form(from_phone=OWNER_PHONE, body=body, media_url=media_url,
-                       message_sid=self._id())
+        ev = _mms_form(from_phone=OWNER_PHONE, body=body, media_url=media_url, message_sid=self._id())
         self.inbound_events.append(ev)
         return ev
 
@@ -105,12 +115,20 @@ class TwilioSmsMock:
     async def send(self, payload: dict[str, Any]) -> dict[str, Any]:
         if self.rate_limited:
             # Real Twilio 429 (rate-limited) JSON body:
-            return {"code": 20429, "message": "Too Many Requests",
-                    "more_info": "https://www.twilio.com/docs/errors/20429",
-                    "status": 429}
+            return {
+                "code": 20429,
+                "message": "Too Many Requests",
+                "more_info": "https://www.twilio.com/docs/errors/20429",
+                "status": 429,
+            }
         self.send_log.append(payload)
-        return {"sid": self._id(), "status": "queued", "to": payload.get("To"),
-                "from": payload.get("From"), "body": payload.get("Body", "")}
+        return {
+            "sid": self._id(),
+            "status": "queued",
+            "to": payload.get("To"),
+            "from": payload.get("From"),
+            "body": payload.get("Body", ""),
+        }
 
     def force_disconnect(self) -> None:
         self._disconnect_pending = True
