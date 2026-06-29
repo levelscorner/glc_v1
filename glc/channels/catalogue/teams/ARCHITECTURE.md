@@ -170,9 +170,9 @@ shallowest `TextBlock` — which is almost always the headline.
 ```python
 def _extract_card_text(card_content):
     """Walk an Adaptive Card body breadth-first for the first TextBlock."""
-    queue = list(card_content.get("body", []))
+    queue = deque(card_content.get("body", []))
     while queue:
-        node = queue.pop(0)              # FIFO = breadth-first
+        node = queue.popleft()           # FIFO = breadth-first, O(1)
         if node.get("type") == "TextBlock":
             return node.get("text", "")
         for key in ("items", "columns", "body"):
