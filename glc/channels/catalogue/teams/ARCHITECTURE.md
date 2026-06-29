@@ -190,12 +190,13 @@ a follow-up card) can access it without re-parsing the activity.
 
 ### Why BFS, not DFS
 
-Imagine an approval card with a Container holding a ColumnSet — the
-left column has a small "approval-required" footnote TextBlock; the
-right column has the actual headline. DFS would dive into the first
-column and return the footnote. BFS opens all top-level containers
-first and finds the headline at a shallower depth. The headline is
-what the user clicked the bot for.
+BFS finds the shallowest `TextBlock` — the one closest to the root
+of the card's `body` array. In real approval cards the primary
+message is often a bare `TextBlock` directly in `body[]`, while
+footnotes live inside a nested `Container`. BFS reaches that
+top-level `TextBlock` before descending into any container. DFS
+could enter a `Container` first and return a buried footnote before
+ever seeing the top-level `TextBlock`.
 
 References:
 - [Adaptive Cards reference (Teams)](https://learn.microsoft.com/en-us/microsoftteams/platform/task-modules-and-cards/cards/cards-reference)
