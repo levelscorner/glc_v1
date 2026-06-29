@@ -211,9 +211,11 @@ References:
 
 In a public team channel (`config["is_public_channel"]=True`), the
 allowlist gate further enforces `allowed_senders` and
-`mention_only_in_public` (default `true`). Strangers in busy groups
-are silently dropped — the adapter returns `None` so the agent is not
-triggered on every passing message.
+`mention_only_in_public` (default `true`). In public channels,
+strangers are either silently dropped (`None`) or passed through with
+`trust_level == "untrusted"` — `test_allowlist_silently_drops_stranger_in_public`
+accepts both. Pick one and assert it; downstream policy code cannot
+safely branch on `msg is None` if the behavior is undefined.
 
 The trust level is the **first** field the policy engine inspects on
 the envelope; the adapter never reaches into the policy engine
