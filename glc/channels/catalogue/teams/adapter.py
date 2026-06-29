@@ -15,6 +15,7 @@ Key wire-format facts from the Bot Framework docs:
 from __future__ import annotations
 
 import os
+import re
 import time
 from datetime import UTC, datetime
 from typing import Any
@@ -22,8 +23,11 @@ from typing import Any
 from glc.channels.base import ChannelAdapter
 from glc.channels.catalogue.teams.schemas import ADAPTIVE_CARD_CONTENT_TYPE
 from glc.channels.envelope import ChannelMessage, ChannelReply
+from glc.security.allowlists import allowed
 from glc.security.pairing import get_pairing_store
 from glc.security.trust_level import classify
+
+_MENTION_RE = re.compile(r"<at>[^<]*</at>\s*")
 
 _TOKEN_CACHE: dict[str, tuple[str, float]] = {}  # app_id -> (token, expires_at)
 
@@ -115,16 +119,22 @@ class Adapter(ChannelAdapter):
 
         trust_level = classify(self.name, user_id)
 
-        # Public channel: drop strangers who don't mention the bot.
+        # Public channel: gate via allowlists (mention_only_in_public default true).
         if self.config.get("is_public_channel"):
-            if trust_level == "untrusted":
-                store = get_pairing_store()
-                owner_ids = {r.channel_user_id for r in store.owners(self.name)}
-                if user_id not in owner_ids and not _bot_mentioned(raw):
-                    return None
+            owner_ids = [r.channel_user_id for r in get_pairing_store().owners(self.name)]
+            ok, _ = allowed(
+                self.name,
+                user_id,
+                owner_ids=owner_ids,
+                is_public_channel=True,
+                was_mentioned=_bot_mentioned(raw),
+            )
+            if not ok:
+                return None
 
-        # Extract text from plain message or Adaptive Card.
-        text: str | None = raw.get("text") or None
+        # Extract text from plain message or Adaptive Card; strip mention markup.
+        raw_text: str = raw.get("text") or ""
+        text: str | None = _MENTION_RE.sub("", raw_text).strip() or None
         metadata: dict[str, Any] = {}
 
         for att in raw.get("attachments") or []:
@@ -162,7 +172,11 @@ class Adapter(ChannelAdapter):
     async def send(self, reply: ChannelReply) -> Any:
         mock = self.config.get("mock")
 
-        payload: dict[str, Any] = {"type": "message", "text": reply.text or ""}
+        payload: dict[str, Any] = {
+            "type": "message",
+            "text": reply.text or "",
+            "textFormat": "markdown",
+        }
         if reply.thread_id:
             payload["replyToId"] = reply.thread_id
 
