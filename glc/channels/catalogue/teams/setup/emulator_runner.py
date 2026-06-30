@@ -78,10 +78,14 @@ def build_app(*, no_emulator: bool = False) -> FastAPI:
             text=f"[echo] {msg.text or '(no text)'}",
             thread_id=msg.thread_id,
         )
-        outbound = await adapter.send(reply)
+        await adapter.send(reply)
 
-        _LOG.info("round-trip OK  in=%r  out=%r", msg.text, outbound)
-        return JSONResponse(status_code=200, content=outbound)
+        # capture.send_log[0] is the actual Bot Framework Activity body
+        # (type/text/replyToId/textFormat). adapter.send() returns the
+        # mock's ack dict, not the payload itself.
+        payload = capture.send_log[0] if capture.send_log else {}
+        _LOG.info("round-trip OK  in=%r  out=%r", msg.text, payload)
+        return JSONResponse(status_code=200, content=payload)
 
     return app
 
