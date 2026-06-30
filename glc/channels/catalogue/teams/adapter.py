@@ -152,11 +152,7 @@ class Adapter(ChannelAdapter):
         }
 
         ts_raw: str | None = raw.get("timestamp")
-        arrived_at = (
-            datetime.fromisoformat(ts_raw.replace("Z", "+00:00"))
-            if ts_raw
-            else datetime.now(UTC)
-        )
+        arrived_at = datetime.fromisoformat(ts_raw.replace("Z", "+00:00")) if ts_raw else datetime.now(UTC)
 
         return ChannelMessage(
             channel=self.name,
@@ -199,5 +195,11 @@ class Adapter(ChannelAdapter):
         )
         async with httpx.AsyncClient(timeout=10.0) as client:
             resp = await client.post(url, json=payload, headers={"Authorization": f"Bearer {token}"})
+            if resp.status_code == 429:
+                return {
+                    "status": 429,
+                    "error": "Throttled",
+                    "retry_after": float(resp.headers.get("Retry-After", 0)),
+                }
             resp.raise_for_status()
             return resp.json()
