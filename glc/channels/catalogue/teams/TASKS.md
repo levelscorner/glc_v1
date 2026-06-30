@@ -56,7 +56,7 @@ claim message.
 |--:|---|--:|---|---|---|
 | **A** | Core `adapter.py` + `schemas.py` — `on_message` + `send`; all 7 tests pass | 6–8 | ✅ done | Swapnil Gusani | `swapniel/teams-adapter` |
 | **B** | `ARCHITECTURE.md` § Adaptive Card BFS — done as part of PR #1 | 2–3 | ✅ done | Abhinav Rana | `abhinav/teams-architecture-doc` |
-| **C** | `setup/emulator_runner.py` + `setup/__init__.py` — local stub server for the demo | 4–6 | unclaimed | — | `<name>/teams-emulator-runner` |
+| **C** | `setup/emulator_runner.py` + `setup/__init__.py` — local stub server for the demo | 4–6 | ✅ done | Swapnil Gusani | `swapniel/teams-emulator-runner` |
 | **D** | `setup/trust_setup.py` — CLI to pair/unpair/list trusted users | 3–4 | unclaimed | — | `<name>/teams-trust-setup` |
 | **E** | `setup/README.md` — Bot Framework Emulator + Azure setup walkthrough | 3–4 | unclaimed | — | `<name>/teams-setup-readme` |
 | **F** | `ARCHITECTURE.md` § wire-format quirks table — done as part of PR #1 | 2–3 | ✅ done | Abhinav Rana | `abhinav/teams-architecture-doc` |
